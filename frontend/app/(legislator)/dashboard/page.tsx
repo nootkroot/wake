@@ -6,7 +6,7 @@ import { TopicBreakdown } from "@/components/legislator/TopicBreakdown";
 import { PeriodSummaryCard } from "@/components/legislator/PeriodSummaryCard";
 import { BudgetPieChart } from "@/components/legislation/BudgetPieChart";
 import { SubmissionCard } from "@/components/submissions/SubmissionCard";
-import Link from "next/link";
+import { DashboardNav } from "@/components/legislator/DashboardNav";
 
 export const dynamic = "force-dynamic";
 
@@ -31,34 +31,7 @@ export default async function DashboardPage({
             Aggregated citizen signal · {activePeriod?.label ?? "all periods"}
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {periods.map((p) => (
-            <Link
-              key={p.id}
-              href={`/dashboard?period=${p.id}`}
-              className={
-                "rounded-md border px-3 py-1 text-sm " +
-                (p.id === activePeriod?.id
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border")
-              }
-            >
-              {p.label}
-            </Link>
-          ))}
-          <Link
-            href="/dashboard/map"
-            className="rounded-md border border-border px-3 py-1 text-sm"
-          >
-            Map view
-          </Link>
-          <Link
-            href="/dashboard/demographics"
-            className="rounded-md border border-border px-3 py-1 text-sm"
-          >
-            Demographics
-          </Link>
-        </div>
+        <DashboardNav />
       </header>
 
       <div className="grid gap-4 lg:grid-cols-3">
