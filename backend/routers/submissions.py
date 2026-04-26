@@ -165,7 +165,9 @@ def submissions_map(
         select(Submission)
         .where(
             Submission.display_mode == DisplayMode.ISSUE,
-            Submission.status == SubmissionStatus.ACTIVE,
+            Submission.status.in_(
+                [SubmissionStatus.ACTIVE, SubmissionStatus.PENDING_REVIEW]
+            ),
             Submission.latitude.is_not(None),
             Submission.longitude.is_not(None),
         )

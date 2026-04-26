@@ -21,7 +21,7 @@ function severityColor(severity: number | null): string {
     case 1:
       return "#94a3b8";
     default:
-      return "#60a5fa";
+      return "#a3a3a3";
   }
 }
 
