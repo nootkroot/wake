@@ -2,74 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { WakeNavBrand } from "@/components/brand/WakeNavBrand";
 import { AuthButtons } from "@/components/auth/AuthButtons";
 import { LanguageSelect } from "@/components/i18n/LanguageSelect";
+import { appHeaderNavUpper } from "@/components/layout/appHeaderClasses";
 import { useSiteLanguage } from "@/components/i18n/SiteLanguageProvider";
 
-const navPillInactive =
-  "rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground transition-colors";
-const navPillActive =
-  "rounded-md bg-primary px-3 py-1.5 text-primary-foreground hover:opacity-90";
-
-function isSuggestionsListOrDetail(pathname: string) {
-  if (pathname === "/suggestions") return true;
-  if (pathname.startsWith("/suggestions/") && !pathname.startsWith("/suggestions/new")) {
-    return true;
-  }
-  return false;
-}
-
+/**
+ * In-app routes: same nav + auth look as {@link LandingHeader}, full width,
+ * plus Legislation / Submit / compact globe language (landing omits those).
+ */
 export function SiteHeader() {
   const pathname = usePathname();
   const { t } = useSiteLanguage();
 
-  /* Landing uses `LandingHeader` inside the page (five links, right half only). */
   if (pathname === "/") {
     return null;
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[100] border-b border-border bg-black/90 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
-          <span className="text-primary">Wa</span>ke
-        </Link>
-        <div className="flex items-center gap-2 text-sm sm:gap-3">
-          <Link
-            href="/issues"
-            className={pathname.startsWith("/issues") ? navPillActive : navPillInactive}
-          >
+    <header className="fixed inset-x-0 top-0 z-[100] flex h-[5.5rem] items-center bg-black">
+      <nav
+        aria-label="Primary"
+        className="flex w-full min-w-0 items-center gap-3 px-4 sm:gap-4 sm:px-5 md:gap-6 md:px-6 lg:px-8"
+      >
+        <WakeNavBrand />
+
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-x-5 overflow-x-auto overscroll-x-contain md:gap-x-7 lg:gap-x-9 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Link href="/issues" className={appHeaderNavUpper}>
             {t("issues", "Issues")}
           </Link>
-          <Link
-            href="/suggestions"
-            className={isSuggestionsListOrDetail(pathname) ? navPillActive : navPillInactive}
-          >
+          <Link href="/suggestions" className={appHeaderNavUpper}>
             {t("suggestions", "Suggestions")}
           </Link>
-          <Link
-            href="/legislation"
-            className={pathname.startsWith("/legislation") ? navPillActive : navPillInactive}
-          >
+          <Link href="/legislation" className={appHeaderNavUpper}>
             {t("legislation", "Legislation")}
           </Link>
-          <Link
-            href="/dashboard"
-            className={pathname.startsWith("/dashboard") ? navPillActive : navPillInactive}
-          >
+          <Link href="/dashboard" className={appHeaderNavUpper}>
             {t("dashboard", "Dashboard")}
           </Link>
-          <Link
-            href="/suggestions/new"
-            className={pathname.startsWith("/suggestions/new") ? navPillActive : navPillInactive}
-          >
+          <Link href="/suggestions/new" className={appHeaderNavUpper}>
             {t("submit", "Submit")}
           </Link>
-          <LanguageSelect />
-          <AuthButtons />
+        </div>
+
+        <div className="flex shrink-0 flex-nowrap items-center gap-4 md:gap-5">
+          <AuthButtons variant="chrome" />
+          <LanguageSelect variant="chromeIcon" />
         </div>
       </nav>
     </header>
   );
 }
-

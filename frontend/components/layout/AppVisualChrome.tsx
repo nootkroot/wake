@@ -15,10 +15,10 @@ export function AppVisualChrome({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-[calc(100dvh-3.25rem)] w-full bg-black">
+    <div className="relative min-h-[calc(100dvh-5.5rem)] w-full bg-black">
       <SiteHeader />
       <WakeSceneBackdrop position="fixed" />
-      <main className="wake-app-chrome relative z-10 mx-auto max-w-6xl px-6 pb-8 pt-24 text-foreground">
+      <main className="wake-app-chrome relative z-10 mx-auto max-w-6xl px-6 pb-8 pt-[5.5rem] text-foreground">
         {children}
       </main>
     </div>

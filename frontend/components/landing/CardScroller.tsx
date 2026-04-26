@@ -10,7 +10,6 @@ const CARD_FULL     = CARD_HEIGHT + CARD_GAP;
 const SCROLL_SPEED  = 1.0;
 const MOUSE_PARALLAX_X = 14;
 const MOUSE_PARALLAX_Y = 8;
-const BLUR_STRIP_HEIGHT = 140;
 
 export default function CardScroller({ submissions }: { submissions: Submission[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,30 +70,6 @@ export default function CardScroller({ submissions }: { submissions: Submission[
           </div>
         );
       })}
-
-      {/* Top blur strip — strongest at top edge, fades out toward middle */}
-      <div
-        className="absolute top-0 left-0 right-0 pointer-events-none z-30"
-        style={{
-          height: `${BLUR_STRIP_HEIGHT}px`,
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          maskImage: 'linear-gradient(to bottom, black 0%, black 25%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 25%, transparent 100%)',
-        }}
-      />
-
-      {/* Bottom blur strip — strongest at bottom edge, fades out toward middle */}
-      <div
-        className="absolute bottom-0 left-0 right-0 pointer-events-none z-30"
-        style={{
-          height: `${BLUR_STRIP_HEIGHT}px`,
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-          maskImage: 'linear-gradient(to top, black 0%, black 25%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, black 0%, black 25%, transparent 100%)',
-        }}
-      />
     </div>
   );
 }
