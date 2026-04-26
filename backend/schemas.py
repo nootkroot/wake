@@ -56,6 +56,7 @@ class SubmissionRead(BaseModel):
     display_score: int
     vote_count: int
     status: SubmissionStatus
+    report_count: int
     scope_tag: Optional[str]
     tags: list[str]
     lang: str

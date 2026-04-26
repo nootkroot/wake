@@ -56,7 +56,7 @@ export default function JobsPage() {
         <div>
           <h1 className="text-2xl font-semibold">Job queue</h1>
           <p className="text-sm text-muted-foreground">
-            All AI work is manually triggered — no background workers, no cron.
+            Operational queue for background tasks and processing visibility.
           </p>
         </div>
         <div className="flex gap-2 items-center">

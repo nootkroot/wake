@@ -15,9 +15,9 @@ const ROLES = [
   },
   {
     title: "Admin",
-    body: "Trigger AI jobs, review moderation flags, ingest legislation.",
-    cta: "Open admin",
-    href: "/jobs",
+    body: "Review moderation queues, resolve flagged content, and monitor policy health.",
+    cta: "Open moderation dashboard",
+    href: "/moderation",
   },
 ];
 

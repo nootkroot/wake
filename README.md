@@ -228,7 +228,7 @@ triggers it.** Here's the full happy path:
 3. Fill in title, body, tags. Hit **Submit**. The submission lands in
    `PENDING_REVIEW` status, and a `SCORE_SUBMISSION` job is queued.
 
-### b. Run the AI scoring job
+### b. Review moderation dashboard
 
 Set the `wake_role=admin` cookie so middleware lets you into `/admin/*`:
 
@@ -237,10 +237,9 @@ Set the `wake_role=admin` cookie so middleware lets you into `/admin/*`:
 document.cookie = "wake_role=admin; path=/; max-age=86400"
 ```
 
-1. Visit http://localhost:3000/admin/jobs.
-2. Paste your `ADMIN_TOKEN` in the input field.
-3. Click **Run 3 jobs**. The job moves `PENDING → RUNNING → DONE`. The
-   submission's status flips to `ACTIVE` and gets a severity + rationale.
+1. Visit http://localhost:3000/moderation.
+2. Review hidden/flagged submissions.
+3. Use moderation tooling to audit and triage content quality.
 
 ### c. Vote and explore
 
@@ -265,10 +264,10 @@ Set `wake_role=admin` (above), then either:
        -H "X-Admin-Token: $ADMIN_TOKEN"
   ```
 
-This enqueues a `CLOSE_PERIOD` job. Run it from `/admin/jobs`. The job
-finalizes ranks (using `true_score`, *not* `display_score`), flips all
-in-period submissions to `CLOSED`, renders a PDF (or HTML fallback) under
-`exports/`, and stores the path on the period's `export_url`.
+This enqueues a `CLOSE_PERIOD` job. The job finalizes ranks (using
+`true_score`, *not* `display_score`), flips all in-period submissions to
+`CLOSED`, renders a PDF (or HTML fallback) under `exports/`, and stores the
+path on the period's `export_url`.
 
 Then `GET /api/v1/periods/{id}/export` 302s to that file.
 
@@ -282,9 +281,8 @@ demographics breakdown.
 
 ## 7. Operating model
 
-- **No background workers.** All AI work is enqueued in `jobqueue` and
-  runs only when an admin posts to `/api/v1/jobs/run`. The admin UI at
-  `/admin/jobs` triggers this.
+- **AI issue scoring is automatic.** New issues are scored on submit and receive
+  severity + rationale immediately when the model is available.
 - **Score fuzzing.** Every score shown publicly is `display_score`, a
   Gaussian-perturbed copy of `true_score` with a deterministic seed so it
   doesn't drift across refreshes. Final rankings (PDF export) always use
@@ -312,7 +310,7 @@ demographics breakdown.
 | `psql: ERROR: type "vector" does not exist` | Postgres image lacks pgvector. Use `pgvector/pgvector:pg16` or install the extension. |
 | `ModuleNotFoundError: backend` | You're running uvicorn or pytest from the wrong dir. Both expect `cwd = wake/`. |
 | Empty issue map but data exists | `NEXT_PUBLIC_MAPBOX_TOKEN` not set; the component renders a list fallback. |
-| Submissions stuck in `PENDING_REVIEW` | Run jobs from `/admin/jobs` — nothing is automatic. |
+| Submissions stuck in `PENDING_REVIEW` | Check backend logs and OpenRouter credentials; issue scoring should be automatic. |
 | Vote returns `429` | The same session flipped its vote within the cooldown window (2s). Real users will rarely hit this. |
 | WeasyPrint complains about Cairo | Install native deps (see Prerequisites) or accept the HTML fallback. |
 | `403 Admin token required` on `/jobs/*` | Set `X-Admin-Token` header (or paste in the admin UI input) matching `ADMIN_TOKEN` in `backend/.env`. |

@@ -84,6 +84,7 @@ async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
 export async function listSubmissions(
   params: {
     mode?: "ISSUE" | "SUGGESTION";
+    status?: "PENDING_REVIEW" | "ACTIVE" | "HIDDEN" | "CLOSED";
     period_id?: string;
     granularity?: string;
     bbox?: string;

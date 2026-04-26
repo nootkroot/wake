@@ -22,6 +22,7 @@ export interface Submission {
   display_score: number;
   vote_count: number;
   status: SubmissionStatus;
+  report_count: number;
   scope_tag: string | null;
   tags: string[];
   lang: string;
