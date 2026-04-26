@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Map, { Marker } from "react-map-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
@@ -16,12 +18,15 @@ interface Props {
 }
 
 export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Props) {
+  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
+  const DEFAULT_LAT = Number(process.env.NEXT_PUBLIC_DEFAULT_LAT ?? "47.6062");
+  const DEFAULT_LNG = Number(process.env.NEXT_PUBLIC_DEFAULT_LNG ?? "-122.3321");
   const [mode, setMode] = useState<DisplayMode>(defaultMode);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [tagsRaw, setTagsRaw] = useState("");
-  const [lat, setLat] = useState<string>("");
-  const [lng, setLng] = useState<string>("");
+  const [lat, setLat] = useState<string>(DEFAULT_LAT.toFixed(6));
+  const [lng, setLng] = useState<string>(DEFAULT_LNG.toFixed(6));
   const [anonymous, setAnonymous] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +43,11 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
         setError("Couldn't get location — enter manually");
       },
     );
+  }
+
+  function updateLocation(nextLat: number, nextLng: number) {
+    setLat(nextLat.toFixed(6));
+    setLng(nextLng.toFixed(6));
   }
 
   async function submit(e: React.FormEvent) {
@@ -78,7 +88,16 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
       onSubmitted?.(created);
     } catch (e) {
       if (e instanceof ApiError) {
-        setError(`Couldn't submit (${e.status})`);
+        if (
+          typeof e.detail === "object" &&
+          e.detail !== null &&
+          "detail" in e.detail &&
+          typeof (e.detail as { detail?: unknown }).detail === "string"
+        ) {
+          setError((e.detail as { detail: string }).detail);
+        } else {
+          setError(`Couldn't submit (${e.status})`);
+        }
       } else {
         setError("Couldn't submit — please try again.");
       }
@@ -149,26 +168,47 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
           />
 
           {mode === "ISSUE" && (
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                placeholder="Latitude"
-                value={lat}
-                onChange={(e) => setLat(e.target.value)}
-                required
-              />
-              <Input
-                placeholder="Longitude"
-                value={lng}
-                onChange={(e) => setLng(e.target.value)}
-                required
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="col-span-2"
-                onClick={detectLocation}
-              >
+            <div className="space-y-2">
+              {MAPBOX_TOKEN ? (
+                <div className="h-[320px] overflow-hidden rounded-md border border-border">
+                  <Map
+                    mapboxAccessToken={MAPBOX_TOKEN}
+                    initialViewState={{
+                      latitude: Number(lat) || DEFAULT_LAT,
+                      longitude: Number(lng) || DEFAULT_LNG,
+                      zoom: 12,
+                    }}
+                    mapStyle="mapbox://styles/mapbox/dark-v11"
+                    onClick={(evt) => updateLocation(evt.lngLat.lat, evt.lngLat.lng)}
+                  >
+                    <Marker
+                      latitude={Number(lat) || DEFAULT_LAT}
+                      longitude={Number(lng) || DEFAULT_LNG}
+                      draggable
+                      onDragEnd={(evt) => updateLocation(evt.lngLat.lat, evt.lngLat.lng)}
+                    />
+                  </Map>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Map unavailable. Set <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> to use pin selection.
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  placeholder="Latitude"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  required
+                />
+                <Input
+                  placeholder="Longitude"
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={detectLocation}>
                 Use my current location
               </Button>
             </div>

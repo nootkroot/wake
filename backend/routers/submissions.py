@@ -6,6 +6,7 @@ from typing import Annotated, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy import text
 from sqlmodel import Session, select
 
 from ..dependencies import get_db, get_session_id, require_user
@@ -35,6 +36,20 @@ def _to_read(sub: Submission, user_vote: Optional[int] = None) -> SubmissionRead
     return data
 
 
+def _ensure_author_exists(session: Session, user_id: UUID) -> None:
+    """Create a stub auth.users row so local FK checks pass in demo mode."""
+    session.execute(
+        text(
+            """
+            INSERT INTO auth.users (id)
+            VALUES (:user_id)
+            ON CONFLICT (id) DO NOTHING
+            """
+        ),
+        {"user_id": user_id},
+    )
+
+
 @router.post("", response_model=SubmissionRead, status_code=201)
 def create_submission(
     payload: SubmissionCreate,
@@ -51,6 +66,9 @@ def create_submission(
     if payload.latitude is not None and payload.longitude is not None:
         geohash = encode_geohash(payload.latitude, payload.longitude)
         neighborhood = reverse_geocode(payload.latitude, payload.longitude)
+
+    if not payload.is_anonymous:
+        _ensure_author_exists(session, user_id)
 
     submission = Submission(
         display_mode=payload.display_mode,
