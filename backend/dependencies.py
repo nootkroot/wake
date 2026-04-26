@@ -7,6 +7,7 @@ from collections.abc import Generator
 from typing import Annotated, Optional
 from uuid import UUID
 
+import httpx
 from fastapi import Cookie, Depends, Header, HTTPException, Request, status
 from sqlmodel import Session
 
@@ -67,13 +68,50 @@ def require_user(
 
 def require_admin(
     x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token"),
+    user_id: Annotated[Optional[UUID], Depends(get_current_user_id)] = None,
 ) -> None:
     expected = os.environ.get("ADMIN_TOKEN") or get_settings().supabase_service_role_key
-    if not expected:
-        # Demo mode: no admin token configured → allow.
+    if expected and x_admin_token == expected:
         return
-    if x_admin_token != expected:
+
+    if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin token required",
+            detail="Admin account required",
         )
+
+    settings = get_settings()
+    if not settings.supabase_url or not settings.supabase_service_role_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin account required",
+        )
+
+    try:
+        with httpx.Client(timeout=10.0) as client:
+            resp = client.get(
+                f"{settings.supabase_url.rstrip('/')}/auth/v1/admin/users/{user_id}",
+                headers={
+                    "apikey": settings.supabase_service_role_key,
+                    "Authorization": f"Bearer {settings.supabase_service_role_key}",
+                },
+            )
+        if not resp.is_success:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin account required",
+            )
+        payload = resp.json()
+        role = str((payload.get("user_metadata") or {}).get("role", "")).lower()
+        if role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin account required",
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin account required",
+        ) from exc

@@ -11,6 +11,7 @@ from .routers import (
     auth,
     dashboard,
     export,
+    i18n,
     jobs,
     legislation,
     periods,
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix=prefix)
     app.include_router(dashboard.router, prefix=prefix)
     app.include_router(export.router, prefix=prefix)
+    app.include_router(i18n.router, prefix=prefix)
 
     @app.get("/health")
     def health() -> dict:

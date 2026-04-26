@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { browserClient, getRoleFromUser, setRoleCookie } from "@/lib/supabase";
+import { useSiteLanguage } from "@/components/i18n/SiteLanguageProvider";
 
 export function AuthButtons() {
   const supabase = useMemo(() => browserClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useSiteLanguage();
 
   useEffect(() => {
     let mounted = true;
@@ -46,20 +48,20 @@ export function AuthButtons() {
   }
 
   if (loading) {
-    return <span className="text-xs text-muted-foreground">Checking auth...</span>;
+    return <span className="text-xs text-muted-foreground">{t("checking_auth", "Checking auth...")}</span>;
   }
 
   if (!user) {
     return (
       <>
         <Link href="/login" className="hover:text-foreground">
-          Log in
+          {t("login", "Log in")}
         </Link>
         <Link
           href="/signup"
           className="rounded-md border border-border px-3 py-1.5 hover:bg-muted"
         >
-          Sign up
+          {t("signup", "Sign up")}
         </Link>
       </>
     );
@@ -68,14 +70,14 @@ export function AuthButtons() {
   return (
     <>
       <span className="max-w-[180px] truncate text-xs text-muted-foreground" title={user.email}>
-        {user.email ?? "Signed in"}
+        {user.email ?? t("signed_in", "Signed in")}
       </span>
       <button
         type="button"
         onClick={signOut}
         className="rounded-md border border-border px-3 py-1.5 hover:bg-muted"
       >
-        Log out
+        {t("logout", "Log out")}
       </button>
     </>
   );

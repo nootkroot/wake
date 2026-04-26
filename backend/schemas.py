@@ -109,8 +109,19 @@ class TranslateRequest(BaseModel):
     target_lang: str
 
 
+class LegislationUploadResult(BaseModel):
+    doc_id: UUID
+    doc_title: str
+    doc_source: str
+    chunk_count: int
+    source_verified: bool
+    lang: str
+    translated_to: Optional[str] = None
+
+
 class LegislationSearchResultChunk(BaseModel):
     chunk_id: UUID
+    chunk_index: int
     doc_id: UUID
     doc_title: str
     doc_source: str
@@ -127,12 +138,39 @@ class LegislationSearchResponse(BaseModel):
     results: list[LegislationSearchResultChunk]
 
 
+class LegislationAnswerSource(BaseModel):
+    doc_id: UUID
+    doc_title: str
+    doc_source: str
+    chunk_id: UUID
+    chunk_index: int
+    similarity: float
+
+
+class LegislationAnswerResponse(BaseModel):
+    query: str
+    lang: str
+    answer: str
+    sources: list[LegislationAnswerSource]
+    supporting_chunks: list[LegislationSearchResultChunk]
+
+
 class LegislationDocSummary(BaseModel):
     doc_id: UUID
     doc_title: str
     doc_source: str
     chunk_count: int
     source_verified: bool
+
+
+class UiTranslateRequest(BaseModel):
+    texts: list[str] = Field(default_factory=list, max_length=500)
+    target_lang: str = Field(..., min_length=2, max_length=8)
+
+
+class UiTranslateResponse(BaseModel):
+    target_lang: str
+    translations: list[str]
 
 
 # ---------- Voting Periods ----------
@@ -225,6 +263,7 @@ class ScoringResult:
 @dataclass
 class RetrievedChunk:
     chunk_id: UUID
+    chunk_index: int
     doc_id: UUID
     doc_title: str
     doc_source: str
