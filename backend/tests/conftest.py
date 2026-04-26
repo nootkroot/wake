@@ -14,6 +14,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.pool import StaticPool
 from sqlalchemy.types import TypeDecorator, JSON
 from sqlmodel import Session, SQLModel
 
@@ -88,6 +89,7 @@ def engine():
         "sqlite:///:memory:",
         echo=False,
         connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
     )
     database._engine = eng
     SQLModel.metadata.create_all(eng)
