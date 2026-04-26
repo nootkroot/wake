@@ -17,7 +17,7 @@ const ROLES = [
     title: "Admin",
     body: "Trigger AI jobs, review moderation flags, ingest legislation.",
     cta: "Open admin",
-    href: "/admin/jobs",
+    href: "/jobs",
   },
 ];
 
