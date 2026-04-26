@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { useSiteLanguage } from "@/components/i18n/SiteLanguageProvider";
-
-const navUpper =
-  "shrink-0 text-base font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#FFE374]";
-const authLink =
-  "shrink-0 text-base font-medium text-white transition-colors hover:text-[#FFE374]";
-const signUpBtn =
-  "shrink-0 rounded-md border border-white/40 px-3 py-1.5 text-base font-medium text-white transition-colors hover:bg-white/10";
+import {
+  appHeaderAuthLink,
+  appHeaderNavUpper,
+  appHeaderSignUpBtn,
+} from "@/components/layout/appHeaderClasses";
 
 /**
  * Landing-only: full-width black band, exactly five actions confined to the
@@ -27,21 +25,21 @@ export function LandingHeader() {
       <nav
         data-no-auto-translate="true"
         aria-label="Primary"
-        className="fixed right-0 top-0 z-[26] flex h-[5.5rem] w-1/2 max-w-[50vw] items-center justify-end gap-6 bg-black pr-6 sm:gap-8 md:gap-10 md:pr-14"
+        className="fixed right-0 top-0 z-[26] flex h-[5.5rem] w-1/2 max-w-[50vw] flex-nowrap items-center justify-end gap-6 bg-black pr-6 sm:gap-8 md:gap-10 md:pr-14"
       >
-        <Link href="/issues" className={navUpper}>
+        <Link href="/issues" className={appHeaderNavUpper}>
           {t("issues", "Issues")}
         </Link>
-        <Link href="/suggestions" className={navUpper}>
+        <Link href="/suggestions" className={appHeaderNavUpper}>
           {t("suggestions", "Suggestions")}
         </Link>
-        <Link href="/dashboard" className={navUpper}>
+        <Link href="/dashboard" className={appHeaderNavUpper}>
           {t("dashboard", "Dashboard")}
         </Link>
-        <Link href="/login" className={`${authLink} ml-2 sm:ml-4 md:ml-8`}>
+        <Link href="/login" className={`${appHeaderAuthLink} ml-2 sm:ml-4 md:ml-8`}>
           {t("login", "Log in")}
         </Link>
-        <Link href="/signup" className={signUpBtn}>
+        <Link href="/signup" className={appHeaderSignUpBtn}>
           {t("signup", "Sign up")}
         </Link>
       </nav>
