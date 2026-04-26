@@ -73,6 +73,7 @@ export interface VotingPeriod {
 
 export interface LegislationSearchResultChunk {
   chunk_id: string;
+  chunk_index: number;
   doc_id: string;
   doc_title: string;
   doc_source: string;
@@ -89,12 +90,39 @@ export interface LegislationSearchResponse {
   results: LegislationSearchResultChunk[];
 }
 
+export interface LegislationAnswerSource {
+  doc_id: string;
+  doc_title: string;
+  doc_source: string;
+  chunk_id: string;
+  chunk_index: number;
+  similarity: number;
+}
+
+export interface LegislationAnswerResponse {
+  query: string;
+  lang: string;
+  answer: string;
+  sources: LegislationAnswerSource[];
+  supporting_chunks: LegislationSearchResultChunk[];
+}
+
 export interface LegislationDocSummary {
   doc_id: string;
   doc_title: string;
   doc_source: string;
   chunk_count: number;
   source_verified: boolean;
+}
+
+export interface LegislationUploadResult {
+  doc_id: string;
+  doc_title: string;
+  doc_source: string;
+  chunk_count: number;
+  source_verified: boolean;
+  lang: string;
+  translated_to: string | null;
 }
 
 export interface JobRead {

@@ -61,6 +61,24 @@ Context excerpts:
 {context}
 """
 
+LEGISLATION_QA_PROMPT = """You are a legislative analyst assistant.
+Answer the user's question using ONLY the provided context excerpts.
+If the context does not contain enough information, say that explicitly.
+Keep the answer concise and factual. Include key numbers and years when present.
+
+CRITICAL LANGUAGE RULES:
+- Respond ONLY in this language code: {lang}
+- Do not switch to English unless {lang} is English.
+- If legal or budget terms are proper nouns, you may keep the official term, but all explanation text must remain in {lang}.
+- If there is insufficient evidence, state that in {lang}.
+
+User question:
+{question}
+
+Context excerpts:
+{context}
+"""
+
 
 class GemmaClient:
     def __init__(self, httpx_client: httpx.AsyncClient | None = None) -> None:
@@ -168,9 +186,15 @@ class GemmaClient:
         except Exception as exc:  # pragma: no cover
             raise GemmaError("Gemma translate request failed") from exc
 
-        if not isinstance(data, list):
-            raise GemmaError(f"Invalid translate response: {data!r}")
-        return [str(x) for x in data]
+        if isinstance(data, list):
+            return [str(x) for x in data]
+        if isinstance(data, dict):
+            if isinstance(data.get("translations"), list):
+                return [str(x) for x in data["translations"]]
+            numeric_keys = sorted((k for k in data.keys() if str(k).isdigit()), key=lambda x: int(str(x)))
+            if numeric_keys:
+                return [str(data[k]) for k in numeric_keys]
+        raise GemmaError(f"Invalid translate response: {data!r}")
 
     async def query_legislation(
         self,
@@ -187,6 +211,39 @@ class GemmaClient:
             filter=chunk_filter,
             prefer_lang=lang,
         )
+
+    async def answer_legislation_question(
+        self,
+        question: str,
+        context_chunks: list[str],
+        lang: str = "en",
+    ) -> str:
+        if not context_chunks:
+            return _no_context_message(lang)
+        if self.offline:
+            return _offline_legislation_answer(question, context_chunks, lang)
+        prompt = LEGISLATION_QA_PROMPT.format(
+            question=question.strip(),
+            lang=lang,
+            context="\n\n---\n\n".join(context_chunks),
+        )
+        try:
+            text = await self._generate_text(prompt, expect_json=False)
+        except Exception as exc:  # pragma: no cover
+            raise GemmaError("Gemma legislation QA request failed") from exc
+        answer = str(text).strip()
+        # Hard-enforce caller's language choice by post-translation.
+        # This prevents mixed-language outputs even when the model drifts.
+        target_lang = (lang or "en").strip().lower()
+        if answer and target_lang and target_lang != "en":
+            try:
+                translated = await self.translate_chunks([answer], target_lang=target_lang)
+                if translated and translated[0].strip():
+                    answer = translated[0].strip()
+            except GemmaError:
+                # Keep original answer if translation fails.
+                pass
+        return answer[:4000] if answer else "No answer generated."
 
     async def embed_texts(self, texts: list[str]) -> list[list[float]]:
         # OpenRouter doesn't expose a stable embedding endpoint for Gemma, so
@@ -298,6 +355,82 @@ def _offline_embed(text: str, dim: int = 768) -> list[float]:
         raw.append(((seed >> 11) & 0xFFFFFFFF) / (1 << 32) * 2.0 - 1.0)
     norm = math.sqrt(sum(x * x for x in raw)) or 1.0
     return [x / norm for x in raw]
+
+
+def _offline_legislation_answer(question: str, context_chunks: list[str], lang: str) -> str:
+    joined = " ".join(context_chunks)[:1200]
+    return (
+        f"[{lang}] Based on available excerpts, this is the best match for your question "
+        f"'{question}': {joined}"
+    )
+
+
+def _no_context_message(lang: str) -> str:
+    code = (lang or "en").strip().lower()
+    known = {
+        "en": "I could not find relevant legislation excerpts to answer that question.",
+        "es": "No pude encontrar fragmentos legislativos relevantes para responder esa pregunta.",
+        "fr": "Je n'ai pas trouvé d'extraits législatifs pertinents pour répondre à cette question.",
+        "de": "Ich konnte keine relevanten Gesetzesauszüge finden, um diese Frage zu beantworten.",
+        "pt": "Nao encontrei trechos legislativos relevantes para responder a essa pergunta.",
+        "it": "Non ho trovato estratti legislativi pertinenti per rispondere a questa domanda.",
+        "zh": "我未能找到相关的立法内容来回答这个问题。",
+        "ja": "この質問に答えるための関連する法令抜粋が見つかりませんでした。",
+        "ko": "이 질문에 답할 관련 입법 문구를 찾지 못했습니다.",
+        "ar": "لم أتمكن من العثور على مقاطع تشريعية ذات صلة للإجابة على هذا السؤال.",
+        "hi": "मुझे इस प्रश्न का उत्तर देने के लिए प्रासंगिक विधायी अंश नहीं मिले।",
+        "ru": "Я не нашел релевантных законодательных фрагментов для ответа на этот вопрос.",
+        "tr": "Bu soruyu yanitlamak icin ilgili mevzuat bolumleri bulamadim.",
+        "vi": "Toi khong tim thay doan lap phap phu hop de tra loi cau hoi nay.",
+        "tl": "Wala akong mahanap na kaugnay na bahagi ng batas para sagutin ang tanong na ito.",
+    }
+    return known.get(code, known["en"])
+
+
+def detect_language_code(text_value: str) -> str:
+    text_lower = (text_value or "").strip().lower()
+    if not text_lower:
+        return "en"
+    if re.search(r"[\u3040-\u30ff]", text_lower):
+        return "ja"
+    if re.search(r"[\u4e00-\u9fff]", text_lower):
+        return "zh"
+    if re.search(r"[\uac00-\ud7af]", text_lower):
+        return "ko"
+    if re.search(r"[\u0400-\u04ff]", text_lower):
+        return "ru"
+    if re.search(r"[\u0600-\u06ff]", text_lower):
+        return "ar"
+    if re.search(r"[\u0900-\u097f]", text_lower):
+        return "hi"
+
+    words = re.findall(r"[a-zA-Z0-9]+", text_lower)
+    word_set = set(words)
+    if not word_set:
+        return "en"
+
+    weighted_terms: dict[str, dict[str, int]] = {
+        "en": {"what": 2, "was": 1, "the": 1, "budget": 2, "police": 2, "in": 1},
+        "es": {"que": 2, "cual": 2, "presupuesto": 3, "policia": 3, "de": 1, "la": 1},
+        "fr": {"quel": 3, "quelle": 3, "budget": 2, "police": 2, "pour": 1, "dans": 1},
+        "de": {"wie": 2, "was": 1, "haushalt": 3, "polizei": 3, "jahr": 1},
+        "pt": {"qual": 2, "orcamento": 3, "policia": 3, "em": 1, "ano": 1},
+        "it": {"quale": 2, "bilancio": 3, "polizia": 3, "nel": 1, "anno": 1},
+        "tr": {"butce": 3, "polis": 3, "nedir": 2, "icin": 1, "yilinda": 1},
+        "vi": {"ngan": 2, "sach": 2, "canh": 2, "sat": 2, "nam": 1},
+        "tl": {"ano": 2, "badyet": 3, "pulis": 3, "ang": 1},
+    }
+
+    best_lang = "en"
+    best_score = 0
+    for code, terms in weighted_terms.items():
+        score = sum(weight for term, weight in terms.items() if term in word_set)
+        if code == "es" and ("¿" in text_lower or "¡" in text_lower):
+            score += 2
+        if score > best_score:
+            best_score = score
+            best_lang = code
+    return best_lang if best_score > 0 else "en"
 
 
 # Convenience singleton accessor

@@ -37,6 +37,7 @@ export function ResultChunk({
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="truncate">{chunk.doc_title}</CardTitle>
           <div className="flex items-center gap-2">
+            <Badge>Chunk #{chunk.chunk_index}</Badge>
             {chunk.source_verified && <Badge>Verified source</Badge>}
             <Badge>match {(chunk.similarity * 100).toFixed(0)}%</Badge>
           </div>

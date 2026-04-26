@@ -6,7 +6,9 @@ import type {
   GeoJSONCollection,
   JobRead,
   JobRunResponse,
+  LegislationAnswerResponse,
   LegislationDocSummary,
+  LegislationUploadResult,
   LegislationSearchResponse,
   ReportResult,
   Submission,
@@ -170,8 +172,34 @@ export async function searchLegislation(
   return api<LegislationSearchResponse>(`/legislation/search?${qs}`);
 }
 
+export async function askLegislation(
+  q: string,
+  params: {
+    lang?: string;
+    top_k?: number;
+    granularity?: string;
+    retrieval_mode?: "keyword" | "vector";
+  } = {},
+): Promise<LegislationAnswerResponse> {
+  const qs = new URLSearchParams({ q });
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) qs.set(k, String(v));
+  });
+  return api<LegislationAnswerResponse>(`/legislation/ask?${qs}`);
+}
+
 export async function listLegislationDocs(): Promise<LegislationDocSummary[]> {
   return api<LegislationDocSummary[]>("/legislation/docs");
+}
+
+export async function deleteLegislationDoc(
+  docId: string,
+  userId: string,
+): Promise<{ doc_id: string; deleted_chunks: number }> {
+  return api<{ doc_id: string; deleted_chunks: number }>(`/legislation/docs/${docId}`, {
+    method: "DELETE",
+    userId,
+  });
 }
 
 export async function ingestLegislation(
@@ -188,6 +216,31 @@ export async function ingestLegislation(
     method: "POST",
     body: payload,
     adminToken,
+  });
+}
+
+export async function uploadLegislationFile(
+  payload: {
+    file: File;
+    title: string;
+    source_verified: boolean;
+    granularity?: string;
+    lang?: string;
+    translate_to?: string;
+  },
+  userId: string,
+): Promise<LegislationUploadResult> {
+  const form = new FormData();
+  form.append("file", payload.file);
+  form.append("title", payload.title);
+  form.append("source_verified", String(payload.source_verified));
+  if (payload.granularity) form.append("granularity", payload.granularity);
+  if (payload.lang) form.append("lang", payload.lang);
+  if (payload.translate_to) form.append("translate_to", payload.translate_to);
+  return api<LegislationUploadResult>("/legislation/upload", {
+    method: "POST",
+    body: form,
+    userId,
   });
 }
 
@@ -266,4 +319,17 @@ export async function fetchDashboardDemographics(
     if (v) qs.set(k, String(v));
   });
   return api<DemographicEnrichedSubmission[]>(`/dashboard/demographics?${qs}`);
+}
+
+export async function translateUiStrings(
+  texts: string[],
+  targetLang: string,
+): Promise<string[]> {
+  const cleaned = texts.map((t) => t.trim()).filter(Boolean);
+  if (cleaned.length === 0 || targetLang === "en") return cleaned;
+  const response = await api<{ target_lang: string; translations: string[] }>("/i18n/translate-ui", {
+    method: "POST",
+    body: { texts: cleaned, target_lang: targetLang },
+  });
+  return response.translations;
 }
