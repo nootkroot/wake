@@ -27,9 +27,7 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
   const [tagsRaw, setTagsRaw] = useState("");
   const [lat, setLat] = useState<string>(DEFAULT_LAT.toFixed(6));
   const [lng, setLng] = useState<string>(DEFAULT_LNG.toFixed(6));
-  const [locationLabel, setLocationLabel] = useState<string>(
-    `${DEFAULT_LAT.toFixed(4)}, ${DEFAULT_LNG.toFixed(4)}`,
-  );
+  const [locationLabel, setLocationLabel] = useState<string>("Resolving location...");
   const [mapView, setMapView] = useState({
     latitude: DEFAULT_LAT,
     longitude: DEFAULT_LNG,
@@ -102,6 +100,15 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
       setLocationLabel(coordsFallback);
     }
   }
+
+  useEffect(() => {
+    if (mode !== "ISSUE") return;
+    const currentLat = Number(lat);
+    const currentLng = Number(lng);
+    if (!Number.isFinite(currentLat) || !Number.isFinite(currentLng)) return;
+    void resolveLocationLabel(currentLat, currentLng);
+    // Run on mode switch so the default ISSUE pin always gets an address.
+  }, [mode]);
 
   function updateLocation(nextLat: number, nextLng: number, nextZoom?: number) {
     setLat(nextLat.toFixed(6));
