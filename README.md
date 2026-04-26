@@ -7,18 +7,65 @@ legislators.
 
 ```
 wake/
-├── frontend/           Next.js 14 App Router
-├── backend/            FastAPI + SQLModel
-├── infra/supabase/     SQL migrations + seed
-└── pyproject.toml      Python project root (pytest config)
+├── frontend/             Next.js 14 App Router  (Dockerfile)
+├── backend/              FastAPI + SQLModel     (Dockerfile)
+├── infra/supabase/       SQL migrations + seed
+├── infra/docker/         Docker-only init scripts (auth.users stub)
+├── docker-compose.yml    pgvector + backend + frontend
+└── pyproject.toml        Python project root (pytest config)
 ```
 
-The rest of this document is a complete setup walkthrough. Skip to
-[Operating model](#operating-model) once you have things running.
+The rest of this document covers two paths. **Docker** is the fastest:
+nothing to install except Docker itself. **Manual** is for when you want
+hot-reload across both apps. Skip to [Operating model](#operating-model)
+once you have things running.
 
 ---
 
-## 1. Prerequisites
+## 0. Quick start with Docker (recommended)
+
+```bash
+cp infra/.env.example .env        # optional: edit OPENROUTER_API_KEY etc.
+docker compose up --build
+```
+
+That's it. After the build finishes:
+
+| Service | URL | Notes |
+|---|---|---|
+| Frontend | http://localhost:3000 | Next.js standalone |
+| Backend | http://localhost:8000 | API + `/docs` (Swagger UI) |
+| Health | http://localhost:8000/health | `{"status":"ok"}` |
+| Postgres | localhost:5432 | `postgres` / `postgres` / db `wake` |
+
+The Postgres image runs the schema + seed migrations on first boot:
+
+1. `infra/docker/00_auth_stub.sql` — stubs `auth.users` so the migration's
+   FKs resolve outside Supabase.
+2. `infra/supabase/migrations/001_initial.sql` — the real schema + RLS.
+3. `infra/supabase/seed.sql` — three demo submissions and one period.
+
+Useful commands:
+
+```bash
+docker compose logs -f backend     # tail backend logs
+docker compose exec db psql -U postgres wake     # psql shell
+docker compose down                # stop, keep volumes
+docker compose down -v             # stop + wipe DB (re-runs migrations next time)
+```
+
+> **Note on migrations.** The init scripts only run when the `dbdata` volume
+> is empty. Apply schema changes with `docker compose down -v` (destroys
+> data) or by running new SQL against the running container.
+
+> **Note on Mapbox + OpenRouter.** Both are optional. Without
+> `NEXT_PUBLIC_MAPBOX_TOKEN`, the map components render a list fallback.
+> Without `OPENROUTER_API_KEY`, the backend uses a deterministic offline
+> scorer. The full submit → vote → finalize flow works either way.
+
+---
+
+## 1. Prerequisites (manual setup only)
 
 | Tool | Version | Why |
 |---|---|---|
@@ -269,6 +316,9 @@ demographics breakdown.
 | Vote returns `429` | The same session flipped its vote within the cooldown window (2s). Real users will rarely hit this. |
 | WeasyPrint complains about Cairo | Install native deps (see Prerequisites) or accept the HTML fallback. |
 | `403 Admin token required` on `/jobs/*` | Set `X-Admin-Token` header (or paste in the admin UI input) matching `ADMIN_TOKEN` in `backend/.env`. |
+| Docker: backend starts before DB is ready | The compose file uses `depends_on: condition: service_healthy`, but if you skipped `--build` after schema changes the old image may run first. `docker compose build backend` then `up`. |
+| Docker: changed a migration but no effect | Init scripts only run on a fresh DB. `docker compose down -v` wipes the `dbdata` volume so migrations re-run. |
+| Docker: changed `NEXT_PUBLIC_*` value but UI still shows old value | Public env vars are inlined at build time. Rebuild the frontend image: `docker compose build frontend`. |
 
 ---
 

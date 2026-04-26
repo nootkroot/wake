@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Produces a minimal /app/.next/standalone tree the Docker image ships
+  // without node_modules. Safe (and harmless) outside Docker too.
+  output: "standalone",
   experimental: { typedRoutes: false },
   images: {
     remotePatterns: [

@@ -1,0 +1,35 @@
+.git/
+.gitignore
+README.md
+ARCHITECTURE.md
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+**/.venv/
+**/venv/
+
+# Frontend (built separately)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Local env files — never bake secrets into images
+.env
+.env.*
+!infra/.env.example
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Build artifacts
+exports/
+*.log
+
+# Editor / OS junk
+.idea/
+.vscode/
+.DS_Store

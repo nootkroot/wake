@@ -1,0 +1,73 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: wake
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      # Postgres runs *.sql in /docker-entrypoint-initdb.d in alphabetical
+      # order on first init. Numeric prefixes pin the order.
+      - ./infra/docker/00_auth_stub.sql:/docker-entrypoint-initdb.d/00_auth_stub.sql:ro
+      - ./infra/supabase/migrations/001_initial.sql:/docker-entrypoint-initdb.d/01_initial.sql:ro
+      - ./infra/supabase/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d wake"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/wake
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-admin-token}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-google/gemma-4-26b-a4b-it:exacto}
+      OPENROUTER_API_BASE: ${OPENROUTER_API_BASE:-https://openrouter.ai/api/v1}
+      OPENROUTER_REFERER: ${OPENROUTER_REFERER:-https://wake.local}
+      OPENROUTER_APP_TITLE: ${OPENROUTER_APP_TITLE:-Wake}
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      FUZZ_SIGMA: ${FUZZ_SIGMA:-3.0}
+      DEFAULT_REPORT_THRESHOLD: ${DEFAULT_REPORT_THRESHOLD:-5}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Persist generated PDFs / HTML exports across restarts.
+      - exports:/app/exports
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* must be set at *build* time so Next.js inlines them.
+        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-http://localhost:8000/api/v1}
+        NEXT_PUBLIC_DEFAULT_CITY: ${NEXT_PUBLIC_DEFAULT_CITY:-Seattle}
+        NEXT_PUBLIC_DEFAULT_LAT: ${NEXT_PUBLIC_DEFAULT_LAT:-47.6062}
+        NEXT_PUBLIC_DEFAULT_LNG: ${NEXT_PUBLIC_DEFAULT_LNG:--122.3321}
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  dbdata:
+  exports:
