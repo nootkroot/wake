@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { uploadLegislationFile } from "@/lib/api";
+import { ApiError, formatFastApiDetail, uploadLegislationFile } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { browserClient, getRoleFromUser } from "@/lib/supabase";
@@ -56,8 +56,12 @@ export function LegislationUploadPanel() {
       );
       setFile(null);
       setTitle("");
-    } catch {
-      setError("Upload or processing failed. Verify admin account and file type.");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(formatFastApiDetail(err.detail));
+      } else {
+        setError("Upload or processing failed. Verify admin account and file type.");
+      }
     } finally {
       setBusy(false);
     }

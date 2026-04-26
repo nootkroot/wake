@@ -30,24 +30,63 @@ from ..services.vector_store import VectorStore
 router = APIRouter(prefix="/legislation", tags=["legislation"])
 
 
+def _pdf_text_from_bytes(content: bytes) -> str:
+    """Extract text from PDF; try plain + layout (pypdf), then pdfminer for stubborn budgets."""
+    try:
+        from pypdf import PdfReader
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail="PDF upload requires pypdf in backend environment",
+        ) from exc
+
+    def pypdf_pages() -> str:
+        reader = PdfReader(BytesIO(content))
+        parts: list[str] = []
+        for page in reader.pages:
+            chunk = (page.extract_text() or "").strip()
+            if not chunk:
+                try:
+                    chunk = (page.extract_text(extraction_mode="layout") or "").strip()
+                except TypeError:
+                    pass
+            if chunk:
+                parts.append(chunk)
+        return "\n".join(parts).strip()
+
+    try:
+        text = pypdf_pages()
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail="Failed to parse PDF") from exc
+
+    if len(text) >= 40:
+        return text
+
+    try:
+        from pdfminer.high_level import extract_text
+
+        miner = (extract_text(BytesIO(content)) or "").strip()
+        if len(miner) > len(text):
+            text = miner
+    except Exception:
+        pass
+
+    return text
+
+
 def _extract_legislation_text(file: UploadFile, content: bytes) -> str:
     name = (file.filename or "").lower()
     ctype = (file.content_type or "").lower()
     if name.endswith(".pdf") or "pdf" in ctype:
-        try:
-            from pypdf import PdfReader
-        except Exception as exc:
+        text = _pdf_text_from_bytes(content)
+        if not text:
             raise HTTPException(
                 status_code=422,
-                detail="PDF upload requires pypdf in backend environment",
-            ) from exc
-        try:
-            reader = PdfReader(BytesIO(content))
-            text = "\n".join((page.extract_text() or "") for page in reader.pages).strip()
-        except Exception as exc:
-            raise HTTPException(status_code=422, detail="Failed to parse PDF") from exc
-        if not text:
-            raise HTTPException(status_code=422, detail="PDF has no extractable text")
+                detail=(
+                    "PDF has no extractable text (common for scan-only PDFs). "
+                    "Try a text-based export from the publisher, or TXT/MD."
+                ),
+            )
         return text
 
     if name.endswith((".txt", ".md", ".markdown", ".json", ".csv")) or ctype.startswith("text/"):

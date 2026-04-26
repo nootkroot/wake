@@ -231,17 +231,43 @@ export async function uploadLegislationFile(
   userId: string,
 ): Promise<LegislationUploadResult> {
   const form = new FormData();
-  form.append("file", payload.file);
+  // Non-file parts first, file last — avoids some multipart parsers warning / 422 on large PDFs.
   form.append("title", payload.title);
-  form.append("source_verified", String(payload.source_verified));
+  form.append("source_verified", payload.source_verified ? "true" : "false");
   if (payload.granularity) form.append("granularity", payload.granularity);
   if (payload.lang) form.append("lang", payload.lang);
   if (payload.translate_to) form.append("translate_to", payload.translate_to);
+  form.append("file", payload.file);
   return api<LegislationUploadResult>("/legislation/upload", {
     method: "POST",
     body: form,
     userId,
   });
+}
+
+/** Human-readable message from FastAPI `{ detail: ... }` bodies. */
+export function formatFastApiDetail(detail: unknown): string {
+  if (detail == null) return "Request failed";
+  if (typeof detail === "string") return detail;
+  if (typeof detail === "object" && detail !== null && "detail" in detail) {
+    const d = (detail as { detail: unknown }).detail;
+    if (typeof d === "string") return d;
+    if (Array.isArray(d)) {
+      return d
+        .map((item) => {
+          if (typeof item === "object" && item !== null && "msg" in item) {
+            return String((item as { msg: unknown }).msg);
+          }
+          return JSON.stringify(item);
+        })
+        .join("; ");
+    }
+  }
+  try {
+    return JSON.stringify(detail);
+  } catch {
+    return "Request failed";
+  }
 }
 
 // -------- Jobs / admin --------
