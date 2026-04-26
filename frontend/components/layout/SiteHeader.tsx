@@ -23,8 +23,13 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { t } = useSiteLanguage();
 
+  /* Landing uses `LandingHeader` inside the page (five links, right half only). */
+  if (pathname === "/") {
+    return null;
+  }
+
   return (
-    <header className="border-b border-border">
+    <header className="fixed inset-x-0 top-0 z-[100] border-b border-border bg-black/90 backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           <span className="text-primary">Wa</span>ke

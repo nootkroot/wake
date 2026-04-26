@@ -3,12 +3,9 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { SiteLanguageProvider } from "@/components/i18n/SiteLanguageProvider";
 import { AutoPageTranslator } from "@/components/i18n/AutoPageTranslator";
-import { SiteHeader } from "@/components/layout/SiteHeader";
+import { AppVisualChrome } from "@/components/layout/AppVisualChrome";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { normalizeSiteLocale, SITE_LANGUAGE_COOKIE } from "@/lib/site-i18n";
-
-import { HeaderNavigation } from "@/components/layout/HeaderNavigation";
-
 
 export const metadata: Metadata = {
   title: "Wake — Let Our Voices Rise",
@@ -21,12 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const initialLocale = normalizeSiteLocale(cookieStore.get(SITE_LANGUAGE_COOKIE)?.value);
   return (
     <html lang={initialLocale}>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased bg-black">
         <SiteLanguageProvider initialLocale={initialLocale}>
           <AutoPageTranslator />
-          <SiteHeader />
-          <HeaderNavigation />
-          <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+          <AppVisualChrome>{children}</AppVisualChrome>
           <SiteFooter />
         </SiteLanguageProvider>
       </body>

@@ -23,7 +23,7 @@ export default function HeroPanel() {
           <img
             src={FIGMA_ASSETS.roundSun}
             alt=""
-            className="block aspect-[2/1] h-auto mb-2 object-contain"
+            className="relative z-[1] -mt-6 mb-2 block aspect-[2/1] h-auto object-contain md:-mt-10"
           />
           <img
             src="/assets/WAKE.svg"
