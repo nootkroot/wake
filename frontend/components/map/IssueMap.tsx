@@ -9,6 +9,7 @@ import type { GeoJSONFeature } from "@/lib/types";
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 const DEFAULT_LAT = Number(process.env.NEXT_PUBLIC_DEFAULT_LAT ?? "47.6062");
 const DEFAULT_LNG = Number(process.env.NEXT_PUBLIC_DEFAULT_LNG ?? "-122.3321");
+const UNSCORED_COLOR = "#60a5fa";
 
 function severityColor(severity: number | null): string {
   switch (severity) {
@@ -21,7 +22,7 @@ function severityColor(severity: number | null): string {
     case 1:
       return "#94a3b8";
     default:
-      return "#a3a3a3";
+      return UNSCORED_COLOR;
   }
 }
 
@@ -75,19 +76,23 @@ export function IssueMap() {
         {features.map((f) => {
           const [lng, lat] = f.geometry.coordinates;
           const severity = (f.properties.severity as number | null) ?? null;
+          const isUnscored = severity === null;
           const markerColor = severityColor(severity);
           return (
             <Marker key={String(f.properties.id)} longitude={lng} latitude={lat}>
               <button
                 onClick={() => setActive(f)}
-                className="h-4 w-4 rounded-full border-2 shadow"
+                className="flex h-4 w-4 items-center justify-center rounded-full border-2 text-[10px] font-bold leading-none shadow"
                 style={{
                   backgroundColor: markerColor,
                   borderColor: "#0f172a",
                   boxShadow: "0 0 0 1px rgba(255,255,255,0.2)",
+                  color: isUnscored ? "#0b1220" : "transparent",
                 }}
                 aria-label={String(f.properties.title)}
-              />
+              >
+                {isUnscored ? "?" : ""}
+              </button>
             </Marker>
           );
         })}

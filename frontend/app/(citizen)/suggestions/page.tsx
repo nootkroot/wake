@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { listSubmissions } from "@/lib/api";
 import { SubmissionCard } from "@/components/submissions/SubmissionCard";
-import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -17,16 +15,13 @@ export default async function SuggestionsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header>
         <div>
           <h1 className="text-2xl font-semibold">Suggestions</h1>
           <p className="text-sm text-muted-foreground">
             Forum-style threads, ranked by vote popularity (fuzzed for display).
           </p>
         </div>
-        <Link href="/suggestions/new">
-          <Button>New suggestion</Button>
-        </Link>
       </header>
       <div className="space-y-3">
         {sorted.length === 0 && (
