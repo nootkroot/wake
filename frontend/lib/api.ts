@@ -19,7 +19,7 @@ import type {
 
 const API_BASE =
   typeof window === "undefined"
-    ? (process.env.API_BASE_INTERNAL ?? "http://backend:8000/api/v1")
+    ? (process.env.API_BASE_INTERNAL ?? process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1")
     : (process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1");
 
 export class ApiError extends Error {

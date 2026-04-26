@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
@@ -53,4 +55,13 @@ select.wake-language-select option {
 .wake-map-popup .mapboxgl-popup-tip {
   border-top-color: #0f172a;
   border-bottom-color: #0f172a;
+}
+
+.fnt-display {
+  font-family: 'Novecento Wide DemiBold', 'Novecento sans wide', 'Helvetica', sans-serif;
+}
+
+.fnt-med {
+  font-family: "Helvetica Neue Medium", "Helvetica Medium", Helvetica, Arial, sans-serif;
+  font-weight: 500; /* Medium weight */
 }

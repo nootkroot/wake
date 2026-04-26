@@ -11,9 +11,9 @@ import { HeaderNavigation } from "@/components/layout/HeaderNavigation";
 
 
 export const metadata: Metadata = {
-  title: "Wake",
+  title: "Wake — Let Our Voices Rise",
   description:
-    "Surface, rank, and translate civic issues — citizen voice meets legislative search.",
+    "Talk about your city's issues. Find out your citizens' views.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
