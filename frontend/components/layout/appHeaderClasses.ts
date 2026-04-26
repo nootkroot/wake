@@ -1,6 +1,6 @@
 /** Shared primary nav + auth styles (landing strip + in-app SiteHeader). */
 const appHeaderRowItem =
-  "inline-flex h-10 shrink-0 items-center justify-center text-base font-medium leading-none text-white";
+  "inline-flex h-8 shrink-0 items-center justify-center text-xs font-medium leading-none text-white sm:h-9 sm:text-sm md:h-10 md:text-base";
 
 export const appHeaderNavUpper = `${appHeaderRowItem} uppercase tracking-[0.12em] transition-colors hover:text-[#FFE374]`;
 

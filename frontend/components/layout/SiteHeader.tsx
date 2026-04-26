@@ -13,12 +13,13 @@ import { useSiteLanguage } from "@/components/i18n/SiteLanguageProvider";
  */
 export function SiteHeader({ showBrand = true }: { showBrand?: boolean }) {
   const { t } = useSiteLanguage();
+  const compact = !showBrand;
 
   return (
     <header className="relative flex items-center top-0 z-[100] h-[5.5rem]">
       <div
           aria-hidden
-          className="absolute inset-0 h-[10rem] bg-black/10 backdrop-blur-[15px]"
+          className="pointer-events-none absolute inset-0 h-[10rem] bg-black/10 backdrop-blur-[15px]"
           style={{
             maskImage: 'linear-gradient(to bottom, black 0%, black 25%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 25%, transparent 100%)',
@@ -26,13 +27,19 @@ export function SiteHeader({ showBrand = true }: { showBrand?: boolean }) {
         />
       <nav
         aria-label="Primary"
-        className="relative z-10 flex min-w-0 w-full items-center gap-3 px-4 sm:gap-4 sm:px-5 md:gap-6 md:px-6"
+        className={`relative z-10 flex min-w-0 w-full items-center ${
+          compact ? "gap-2 px-3 sm:gap-3 sm:px-4 md:gap-4 md:px-5" : "gap-3 px-4 sm:gap-4 sm:px-5 md:gap-6 md:px-6"
+        }`}
       >
         
         {showBrand ? <div className="shrink-0"><WakeNavBrand /></div> : null}
 
         <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain touch-pan-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-max items-center gap-x-5 md:gap-x-7 lg:mx-auto lg:gap-x-9">
+          <div
+            className={`flex w-max items-center ${
+              compact ? "gap-x-3 sm:gap-x-4 md:gap-x-6" : "gap-x-5 md:gap-x-7 lg:mx-auto lg:gap-x-9"
+            }`}
+          >
             <Link href="/issues" className={`${appHeaderNavUpper} shrink-0 whitespace-nowrap`}>
               {t("issues", "Issues")}
             </Link>
@@ -48,7 +55,7 @@ export function SiteHeader({ showBrand = true }: { showBrand?: boolean }) {
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-nowrap items-center gap-4 md:gap-5">
+        <div className={`flex shrink-0 flex-nowrap items-center ${compact ? "gap-2 sm:gap-3" : "gap-4 md:gap-5"}`}>
           <AuthButtons variant="chrome" />
           <LanguageSelect variant="chromeIcon" />
         </div>

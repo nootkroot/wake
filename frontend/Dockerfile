@@ -34,8 +34,13 @@ RUN npm run build
 
 FROM node:20-slim AS runner
 WORKDIR /app
+
+ARG NEXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
+ARG API_BASE_INTERNAL=http://backend:8000/api/v1
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
+    NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE \
+    API_BASE_INTERNAL=$API_BASE_INTERNAL \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 

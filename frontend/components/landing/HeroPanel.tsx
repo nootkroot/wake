@@ -17,33 +17,33 @@ export default function HeroPanel() {
       />
 
       {/* Content */}
-      <div className="relative z-10 h-full px-[4rem]  flex flex-col justify-items-center ">
+      <div className="relative z-10 flex h-full flex-col justify-items-center px-[clamp(1rem,4vw,4rem)]">
         {/* Logo block */}
-        <div className="ml-auto h-[60vh] flex flex-col items-end justify-center">
-          <div className="relative z-[1] mb-2 w-auto max-h-[45vh] aspect-[2/1]">
+        <div className="ml-auto flex h-[clamp(16rem,60vh,40rem)] flex-col items-end justify-center">
+          <div className="relative z-[1] mb-[clamp(0.35rem,0.9vw,0.75rem)] h-[clamp(3.5rem,8.5vw,6.5rem)] w-[clamp(8.5rem,20vw,13rem)]">
             <img
               src={FIGMA_ASSETS.roundSun}
               alt=""
-              className="block h-full w-full aspect-[2/1]"
+              className="block h-full w-full object-contain"
             />
           </div>
           <img
             src="/assets/WAKE.svg"
             alt="WAKE"
-            className="block h-[20vh]"
+            className="block h-[clamp(5.5rem,14vw,12rem)]"
           />
-          <p className="helvetica-medium font-bold text-lg tracking-[0.1em] text-white text-right mt-3 pr-1 max-h-[10vh]">
+          <p className="helvetica-medium mt-[clamp(0.5rem,1vw,0.9rem)] max-h-[10vh] pr-1 text-right text-[clamp(0.7rem,1.25vw,1.125rem)] font-bold tracking-[0.1em] text-white">
             LET OUR VOICES RISE
           </p>
         </div>
 
         {/* Divider + bottom row */}
         <div>
-          <div className="border-t-2 border-dashed border-white w-[100%] mt-6 mb-12 " />
+          <div className="mt-[clamp(0.75rem,1.8vw,1.5rem)] mb-[clamp(1.25rem,3.2vw,3rem)] w-full border-t-2 border-dashed border-white" />
 
           <div className="grid grid-cols-2 w-full items-start justify-items-end h-full">
             {/* Top row */}
-            <div className="helvetica-medium text-lg font-bold w-full flex flex-col items-start justify-between h-[60%]">
+            <div className="helvetica-medium flex h-[60%] w-full flex-col items-start justify-between text-[clamp(0.9rem,1.4vw,1.25rem)] font-bold">
               <p className="tracking-[0.08em] leading-tight text-white">
                 TALK ABOUT YOUR<br />CITY&apos;S ISSUES.
               </p>
@@ -53,16 +53,16 @@ export default function HeroPanel() {
             </div>
 
             {/* Bottom row */}
-            <div className="flex flex-col gap-y-4 h-full items-end justify-self-end helvetica-thin text-white ">
+            <div className="helvetica-thin flex h-full flex-col items-end justify-self-end gap-y-[clamp(0.5rem,1.2vw,1rem)] text-white">
               <Link
                 href="/issues"
-                className="flex items-center justify-center w-[12rem] h-[3.5rem] rounded-full bg-[#1e1e1e] border border-white hover:bg-[#2a2a2a]"
+                className="flex h-[clamp(2.3rem,5vw,3.5rem)] w-[clamp(8.75rem,18vw,12rem)] items-center justify-center rounded-full border border-white bg-[#1e1e1e] text-[clamp(0.62rem,1vw,0.9rem)] tracking-[0.03em] hover:bg-[#2a2a2a]"
               >
                 REPORT AN ISSUE
               </Link>        
               <Link
                 href="/legislation"
-                className="flex items-center justify-center w-[12rem] h-[3.5rem] rounded-full bg-[#433650] border border-white hover:bg-[#5a4a6f]"
+                className="flex h-[clamp(2.3rem,5vw,3.5rem)] w-[clamp(8.75rem,18vw,12rem)] items-center justify-center rounded-full border border-white bg-[#433650] text-[clamp(0.62rem,1vw,0.9rem)] tracking-[0.03em] hover:bg-[#5a4a6f]"
               >
                 ANALYZE QUESTIONS
               </Link>
