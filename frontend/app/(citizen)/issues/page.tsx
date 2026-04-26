@@ -22,7 +22,7 @@ export default async function IssuesPage() {
         <div className="space-y-3">
           {issues.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              No issues yet. Submit one from <a className="text-primary" href="/suggestions/new">/suggestions/new</a>.
+              No issues yet. Submit one <a className="text-primary" href="/suggestions/new">here</a>.
             </p>
           )}
           {issues.map((s) => (

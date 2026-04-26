@@ -30,3 +30,16 @@ body {
   color: hsl(var(--foreground));
   font-feature-settings: "ss01", "cv11";
 }
+
+.wake-map-popup .mapboxgl-popup-content {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+}
+
+.wake-map-popup .mapboxgl-popup-tip {
+  border-top-color: #0f172a;
+  border-bottom-color: #0f172a;
+}

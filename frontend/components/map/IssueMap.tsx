@@ -70,17 +70,22 @@ export function IssueMap() {
       <Map
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{ latitude: DEFAULT_LAT, longitude: DEFAULT_LNG, zoom: 11 }}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle="mapbox://styles/mapbox/dark-v11"
       >
         {features.map((f) => {
           const [lng, lat] = f.geometry.coordinates;
           const severity = (f.properties.severity as number | null) ?? null;
+          const markerColor = severityColor(severity);
           return (
             <Marker key={String(f.properties.id)} longitude={lng} latitude={lat}>
               <button
                 onClick={() => setActive(f)}
-                className="h-3 w-3 rounded-full border-2 border-white shadow"
-                style={{ backgroundColor: severityColor(severity) }}
+                className="h-4 w-4 rounded-full border-2 shadow"
+                style={{
+                  backgroundColor: markerColor,
+                  borderColor: "#0f172a",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.2)",
+                }}
                 aria-label={String(f.properties.title)}
               />
             </Marker>
@@ -93,15 +98,27 @@ export function IssueMap() {
             onClose={() => setActive(null)}
             closeOnClick={false}
             anchor="top"
+            className="wake-map-popup"
           >
-            <div className="text-sm">
-              <div className="font-medium">{String(active.properties.title)}</div>
-              <div className="text-xs text-muted-foreground">
+            <div
+              className="text-sm"
+              style={{ color: "#e2e8f0" }}
+            >
+              <div
+                className="font-medium"
+                style={{
+                  color: severityColor((active.properties.severity as number | null) ?? null),
+                }}
+              >
+                {String(active.properties.title)}
+              </div>
+              <div className="text-xs" style={{ color: "#94a3b8" }}>
                 Severity: {String(active.properties.severity ?? "?")} ·
                 Score: {String(active.properties.display_score ?? 0)}
               </div>
               <a
-                className="text-xs text-primary"
+                className="text-xs"
+                style={{ color: "#7dd3fc" }}
                 href={`/issues/${String(active.properties.id)}`}
               >
                 Open →

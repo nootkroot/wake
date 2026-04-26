@@ -35,7 +35,7 @@ export function HeatmapLayer({ periodId }: { periodId?: string }) {
       <Map
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{ latitude: DEFAULT_LAT, longitude: DEFAULT_LNG, zoom: 11 }}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle="mapbox://styles/mapbox/dark-v11"
       >
         <Source id="issues" type="geojson" data={data}>
           <Layer
