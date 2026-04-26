@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Map, { Source, Layer } from "react-map-gl";
+import Map, { Layer, Popup, Source } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { fetchDashboardMap } from "@/lib/api";
-import type { GeoJSONCollection } from "@/lib/types";
+import type { GeoJSONCollection, GeoJSONFeature } from "@/lib/types";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 const DEFAULT_LAT = Number(process.env.NEXT_PUBLIC_DEFAULT_LAT ?? "47.6062");
@@ -12,6 +12,7 @@ const DEFAULT_LNG = Number(process.env.NEXT_PUBLIC_DEFAULT_LNG ?? "-122.3321");
 
 export function HeatmapLayer({ periodId }: { periodId?: string }) {
   const [data, setData] = useState<GeoJSONCollection | null>(null);
+  const [activeIssue, setActiveIssue] = useState<GeoJSONFeature | null>(null);
 
   useEffect(() => {
     fetchDashboardMap(periodId ? { period_id: periodId } : {})
@@ -36,6 +37,18 @@ export function HeatmapLayer({ periodId }: { periodId?: string }) {
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{ latitude: DEFAULT_LAT, longitude: DEFAULT_LNG, zoom: 11 }}
         mapStyle="mapbox://styles/mapbox/dark-v11"
+        interactiveLayerIds={["issues-points"]}
+        onClick={(evt) => {
+          const feature = evt.features?.[0];
+          if (!feature || feature.layer?.id !== "issues-points") return;
+          if (feature.geometry.type !== "Point") return;
+          const [lng, lat] = feature.geometry.coordinates;
+          setActiveIssue({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [lng, lat] },
+            properties: (feature.properties ?? {}) as Record<string, unknown>,
+          });
+        }}
       >
         <Source id="issues" type="geojson" data={data}>
           <Layer
@@ -48,7 +61,38 @@ export function HeatmapLayer({ periodId }: { periodId?: string }) {
               "heatmap-opacity": 0.8,
             }}
           />
+          <Layer
+            id="issues-points"
+            type="circle"
+            paint={{
+              "circle-radius": 5,
+              "circle-color": "#f8fafc",
+              "circle-stroke-color": "#0f172a",
+              "circle-stroke-width": 1,
+              "circle-opacity": 0.9,
+            }}
+          />
         </Source>
+        {activeIssue && (
+          <Popup
+            longitude={activeIssue.geometry.coordinates[0]}
+            latitude={activeIssue.geometry.coordinates[1]}
+            onClose={() => setActiveIssue(null)}
+            closeOnClick={false}
+            anchor="top"
+            className="wake-map-popup"
+          >
+            <div className="text-sm text-slate-200">
+              <div className="font-semibold text-sky-300">
+                {String(activeIssue.properties.title ?? "Issue")}
+              </div>
+              <div className="text-xs text-slate-300">
+                Severity: {String(activeIssue.properties.severity ?? "?")} · Vote popularity:{" "}
+                {String(activeIssue.properties.weight ?? 0)}
+              </div>
+            </div>
+          </Popup>
+        )}
       </Map>
     </div>
   );

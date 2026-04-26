@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { browserClient } from "@/lib/supabase";
+import { browserClient, getRoleFromUser, setRoleCookie } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function LoginPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     });
@@ -29,6 +29,7 @@ export default function LoginPage() {
       setError(authError.message);
       return;
     }
+    setRoleCookie(getRoleFromUser(data.user ?? null));
     router.push("/suggestions/new");
     router.refresh();
   }

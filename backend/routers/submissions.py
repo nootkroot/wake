@@ -291,6 +291,7 @@ def delete_submission(
 def cast_vote(
     submission_id: UUID,
     payload: VoteRequest,
+    user_id: Annotated[UUID, Depends(require_user)],
     session_id: Annotated[str, Depends(get_session_id)],
     session: Annotated[Session, Depends(get_db)],
 ) -> VoteResult:
@@ -300,6 +301,7 @@ def cast_vote(
             submission_id=submission_id,
             session_id=session_id,
             direction=int(payload.direction),
+            user_id=user_id,
         )
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

@@ -29,18 +29,22 @@ function ensureSessionCookie(req: NextRequest, res: NextResponse) {
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const role = req.cookies.get(ROLE_COOKIE)?.value ?? "anon";
+  const isAdminPage =
+    url.pathname.startsWith("/admin") ||
+    url.pathname.startsWith("/jobs") ||
+    url.pathname.startsWith("/moderation");
 
-  if (url.pathname.startsWith("/admin") && role !== "admin") {
+  if (isAdminPage && role !== "admin") {
     const dest = url.clone();
-    dest.pathname = "/";
-    dest.searchParams.set("auth", "admin-required");
+    dest.pathname = "/access-denied";
+    dest.searchParams.set("reason", "admin-required");
     return NextResponse.redirect(dest);
   }
 
   if (url.pathname.startsWith("/dashboard") && !["legislator", "admin"].includes(role)) {
     const dest = url.clone();
-    dest.pathname = "/";
-    dest.searchParams.set("auth", "legislator-required");
+    dest.pathname = "/access-denied";
+    dest.searchParams.set("reason", "legislator-required");
     return NextResponse.redirect(dest);
   }
 

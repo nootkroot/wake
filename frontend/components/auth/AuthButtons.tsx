@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { browserClient } from "@/lib/supabase";
+import { browserClient, getRoleFromUser, setRoleCookie } from "@/lib/supabase";
 
 export function AuthButtons() {
   const supabase = useMemo(() => browserClient(), []);
@@ -16,7 +16,10 @@ export function AuthButtons() {
     supabase.auth
       .getUser()
       .then(({ data }) => {
-        if (mounted) setUser(data.user ?? null);
+        if (mounted) {
+          setUser(data.user ?? null);
+          setRoleCookie(getRoleFromUser(data.user ?? null));
+        }
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -26,6 +29,7 @@ export function AuthButtons() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setRoleCookie(getRoleFromUser(session?.user ?? null));
       setLoading(false);
     });
 
@@ -37,6 +41,7 @@ export function AuthButtons() {
 
   async function signOut() {
     await supabase.auth.signOut();
+    setRoleCookie("anon");
     window.location.href = "/";
   }
 

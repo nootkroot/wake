@@ -5,13 +5,15 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { browserClient } from "@/lib/supabase";
+import { browserClient, setRoleCookie } from "@/lib/supabase";
 
 export default function SignupPage() {
   const supabase = useMemo(() => browserClient(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [isLegislator, setIsLegislator] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -21,9 +23,15 @@ export default function SignupPage() {
     setError(null);
     setMessage(null);
 
-    const { error: authError } = await supabase.auth.signUp({
+    const selectedRole = isAdmin ? "admin" : isLegislator ? "legislator" : "citizen";
+    const { data, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      options: {
+        data: {
+          role: selectedRole,
+        },
+      },
     });
     setBusy(false);
 
@@ -32,6 +40,9 @@ export default function SignupPage() {
       return;
     }
 
+    if (data.user) {
+      setRoleCookie(selectedRole);
+    }
     setMessage("Signup successful. Check your email for a confirmation link, then log in.");
   }
 
@@ -58,6 +69,26 @@ export default function SignupPage() {
               minLength={6}
               required
             />
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={isLegislator}
+                onChange={(e) => setIsLegislator(e.target.checked)}
+              />
+              <span>
+                Register as legislator (hackathon shortcut; no verification).
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+              />
+              <span>
+                Register as admin (hackathon shortcut; no verification).
+              </span>
+            </label>
             {error && <p className="text-sm text-red-500">{error}</p>}
             {message && <p className="text-sm text-green-500">{message}</p>}
             <Button type="submit" disabled={busy}>

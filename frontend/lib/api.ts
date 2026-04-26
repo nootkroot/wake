@@ -17,7 +17,7 @@ import type {
 
 const API_BASE =
   typeof window === "undefined"
-    ? (process.env.API_BASE_INTERNAL ?? process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1")
+    ? (process.env.API_BASE_INTERNAL ?? "http://backend:8000/api/v1")
     : (process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000/api/v1");
 
 export class ApiError extends Error {
@@ -124,11 +124,13 @@ export async function castVote(
   submissionId: string,
   direction: -1 | 0 | 1,
   sessionId: string,
+  userId: string,
 ): Promise<VoteResult> {
   return api<VoteResult>(`/submissions/${submissionId}/vote`, {
     method: "POST",
     body: { direction },
     sessionId,
+    userId,
   });
 }
 

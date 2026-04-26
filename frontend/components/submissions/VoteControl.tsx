@@ -6,6 +6,7 @@ import { getOrCreateSessionId } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import type { Submission } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { browserClient } from "@/lib/supabase";
 
 interface Props {
   submission: Submission;
@@ -31,12 +32,23 @@ export function VoteControl({ submission, onChange }: Props) {
     setBusy(true);
     setError(null);
     try {
+      const supabase = browserClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Log in to vote.");
+        return;
+      }
       const sessionId = getOrCreateSessionId();
-      const result = await castVote(submission.id, next, sessionId);
+      const result = await castVote(submission.id, next, sessionId, user.id);
       setVote(result.user_vote);
       setScore(result.display_score);
       onChange?.({ display_score: result.display_score, user_vote: result.user_vote });
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        setError("Log in to vote.");
+      } else
       if (e instanceof ApiError && e.status === 429) {
         setError("Slow down — too many vote flips");
       } else {
