@@ -11,26 +11,28 @@ export default function HeroPanel() {
         alt=""
         className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" 
         style={{
-          backdropFilter: 'blur(25px)',
-          WebkitBackdropFilter: 'blur(25px)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
         }}
       />
 
       {/* Content */}
-      <div className="relative z-10 h-full px-[4rem] pt-12 flex flex-col justify-items-center max-w-[640px]">
+      <div className="relative z-10 h-full px-[4rem]  flex flex-col justify-items-center ">
         {/* Logo block */}
-        <div className="ml-auto w-full mt-[5vh]">
-          <img
-            src={FIGMA_ASSETS.roundSun}
-            alt=""
-            className="relative z-[1] -mt-6 mb-2 block aspect-[2/1] h-auto object-contain md:-mt-10"
-          />
+        <div className="ml-auto h-[60vh] flex flex-col items-end justify-center">
+          <div className="relative z-[1] mb-2 w-auto max-h-[45vh] aspect-[2/1]">
+            <img
+              src={FIGMA_ASSETS.roundSun}
+              alt=""
+              className="block h-full w-full aspect-[2/1]"
+            />
+          </div>
           <img
             src="/assets/WAKE.svg"
             alt="WAKE"
-            className="block w-full h-auto max-w-full"
+            className="block h-[20vh]"
           />
-          <p className="helvetica-medium font-bold text-lg tracking-[0.1em] text-white text-right mt-3 w-full pr-1">
+          <p className="helvetica-medium font-bold text-lg tracking-[0.1em] text-white text-right mt-3 pr-1 max-h-[10vh]">
             LET OUR VOICES RISE
           </p>
         </div>
@@ -53,7 +55,7 @@ export default function HeroPanel() {
             {/* Bottom row */}
             <div className="flex flex-col gap-y-4 h-full items-end justify-self-end helvetica-thin text-white ">
               <Link
-                href="/issues/new"
+                href="/issues"
                 className="flex items-center justify-center w-[12rem] h-[3.5rem] rounded-full bg-[#1e1e1e] border border-white hover:bg-[#2a2a2a]"
               >
                 REPORT AN ISSUE
