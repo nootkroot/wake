@@ -21,14 +21,16 @@ export default async function LegislationPage() {
       </section>
       <aside className="space-y-6">
         <LegislationUploadPanel />
-        <div>
-          <h2 className="text-base font-semibold">Budget overview</h2>
-          <BudgetPieChart />
-          <p className="mt-2 text-xs text-muted-foreground">
-            Click a slice to drill into that line item (demo data).
-          </p>
+        <div className="space-y-6 overflow-hidden rounded-3xl bg-black p-4">
+          <div className="space-y-3">
+            <h2 className="text-base font-semibold">Budget overview</h2>
+            <BudgetPieChart />
+            <p className="text-xs text-muted-foreground">
+              Click a slice to drill into that line item (demo data).
+            </p>
+          </div>
+          <IngestedDocumentsPanel initialDocs={docs} />
         </div>
-        <IngestedDocumentsPanel initialDocs={docs} />
       </aside>
     </div>
   );

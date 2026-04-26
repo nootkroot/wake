@@ -24,7 +24,7 @@ export function LandingHeader() {
       <nav
         data-no-auto-translate="true"
         aria-label="Primary"
-        className="fixed right-0 top-0 z-[26] flex h-[5.5rem] w-1/2 max-w-[50vw] flex-nowrap items-center justify-end gap-6 bg-black pr-6 sm:gap-8 md:gap-10 md:pr-14"
+        className="fixed right-0 top-0 z-[26] flex h-[5.5rem] w-1/2 max-w-[50vw] flex-nowrap items-center justify-end gap-6 border-b border-white/[0.06] bg-black/40 pr-6 backdrop-blur-xl backdrop-saturate-150 sm:gap-8 md:gap-10 md:pr-14"
       >
         <Link href="/issues" className={appHeaderNavUpper}>
           {t("issues", "Issues")}

@@ -37,8 +37,15 @@ export function BudgetPieChart({
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 8,
+              color: "#fafafa",
+            }}
+          />
+          <Legend wrapperStyle={{ fontSize: 12, color: "#e5e5e5" }} />
         </PieChart>
       </ResponsiveContainer>
     </div>

@@ -21,7 +21,7 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[100] flex h-[5.5rem] items-center bg-black">
+    <header className="fixed inset-x-0 top-0 z-[100] flex h-[5.5rem] items-center border-b border-white/[0.06] bg-black/40 backdrop-blur-xl backdrop-saturate-150">
       <nav
         aria-label="Primary"
         className="flex w-full min-w-0 items-center gap-3 px-4 sm:gap-4 sm:px-5 md:gap-6 md:px-6 lg:px-8"

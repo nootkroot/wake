@@ -102,13 +102,17 @@ export function SearchBar() {
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <span>Answer mode:</span>
         <select
-          className="rounded-md border border-border bg-transparent px-2 py-1 text-xs"
+          className="scheme-dark max-w-full rounded-md border border-white/25 bg-black px-2 py-1 text-xs text-white"
           value={retrievalMode}
           onChange={(e) => setRetrievalMode(e.target.value as "keyword" | "vector")}
           aria-label="Answer retrieval mode"
         >
-          <option value="keyword">Document context (Gemma over important sections)</option>
-          <option value="vector">Vector index retrieval</option>
+          <option value="keyword" className="bg-black text-white">
+            Document context (Gemma over important sections)
+          </option>
+          <option value="vector" className="bg-black text-white">
+            Vector index retrieval
+          </option>
         </select>
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
