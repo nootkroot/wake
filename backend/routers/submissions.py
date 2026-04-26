@@ -25,6 +25,7 @@ from ..schemas import (
     VoteResult,
 )
 from ..services.geocode import encode_geohash, reverse_geocode
+from ..services.gemma import GemmaError, get_gemma_client
 from ..services.jobs import enqueue
 from ..services.score import DuplicateVoteError, ScoreService, fuzz_score
 
@@ -57,7 +58,7 @@ def _ensure_author_exists(session: Session, user_id: UUID) -> None:
 
 
 @router.post("", response_model=SubmissionRead, status_code=201)
-def create_submission(
+async def create_submission(
     payload: SubmissionCreate,
     user_id: Annotated[UUID, Depends(require_user)],
     session: Annotated[Session, Depends(get_db)],
@@ -99,8 +100,29 @@ def create_submission(
     session.commit()
     session.refresh(submission)
 
-    # Enqueue the AI scoring job for manual processing.
-    enqueue(session, JobType.SCORE_SUBMISSION, {"submission_id": str(submission.id)})
+    if submission.display_mode == DisplayMode.ISSUE:
+        # Auto-score new issues immediately so they show rationale + severity right away.
+        try:
+            gemma = get_gemma_client()
+            result = await gemma.score_submission(
+                title=submission.title,
+                body=submission.body,
+                image_url=submission.image_url,
+                context_chunks=[],
+            )
+            submission.severity = result.severity
+            submission.gemma_rationale = result.rationale
+            if submission.status == SubmissionStatus.PENDING_REVIEW:
+                submission.status = SubmissionStatus.ACTIVE
+            session.add(submission)
+            session.commit()
+            session.refresh(submission)
+        except GemmaError:
+            # If live scoring fails, keep manual fallback behavior.
+            enqueue(session, JobType.SCORE_SUBMISSION, {"submission_id": str(submission.id)})
+    else:
+        # Suggestions keep the manual queue flow.
+        enqueue(session, JobType.SCORE_SUBMISSION, {"submission_id": str(submission.id)})
 
     return _to_read(submission)
 
