@@ -9,8 +9,7 @@ import {
 } from "@/components/layout/appHeaderClasses";
 
 /**
- * Landing-only: full-width black band, exactly five actions confined to the
- * viewport’s right half (flex, w-1/2, justify-end). No Legislation / Submit / language.
+ * Landing-only: full-width black band + right-half nav (z below hero on the left).
  */
 export function LandingHeader() {
   const { t } = useSiteLanguage();
