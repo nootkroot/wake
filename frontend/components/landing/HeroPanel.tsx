@@ -17,9 +17,9 @@ export default function HeroPanel() {
       />
 
       {/* Content */}
-      <div className="relative z-10 h-full px-[4rem] pt-10 flex flex-col justify-between max-w-[640px]">
+      <div className="relative z-10 h-full px-[4rem] pt-12 flex flex-col justify-items-center max-w-[640px]">
         {/* Logo block */}
-        <div className="ml-auto w-full">
+        <div className="ml-auto w-full mt-[5vh]">
           <img
             src={FIGMA_ASSETS.roundSun}
             alt=""
@@ -30,37 +30,41 @@ export default function HeroPanel() {
             alt="WAKE"
             className="block w-full h-auto max-w-full"
           />
-          <p className="helvetica font-bold text-s tracking-[0em] text-white text-right mt-3 w-full pr-1">
+          <p className="helvetica-medium font-bold text-lg tracking-[0.1em] text-white text-right mt-3 w-full pr-1">
             LET OUR VOICES RISE
           </p>
         </div>
 
         {/* Divider + bottom row */}
         <div>
-          <div className="border-t-2 border-dashed border-white w-[88%] mb-12" />
+          <div className="border-t-2 border-dashed border-white w-[100%] mt-6 mb-12 " />
 
-          <div className="fnt-med font-bold grid grid-cols-[1fr_auto] gap-x-12 gap-y-12 items-start">
+          <div className="grid grid-cols-2 w-full items-start justify-items-end h-full">
             {/* Top row */}
-            <p className="text-2xl tracking-[0.08em] leading-tight text-white">
-              TALK ABOUT YOUR<br />CITY&apos;S ISSUES.
-            </p>
-            <Link
-              href="/issues/new"
-              className="flex items-center justify-center w-56 h-16 rounded-full bg-[#1e1e1e] border border-white text-white text-sm tracking-[0.15em] font-medium hover:bg-[#2a2a2a]"
-            >
-              REPORT AN ISSUE
-            </Link>
+            <div className="helvetica-medium text-lg font-bold w-full flex flex-col items-start justify-between h-[60%]">
+              <p className="tracking-[0.08em] leading-tight text-white">
+                TALK ABOUT YOUR<br />CITY&apos;S ISSUES.
+              </p>
+              <p className="tracking-[0.08em] leading-tight w-full text-white/60 text-right">
+                FIND OUT YOUR<br />CITIZENS&apos; VIEWS.
+              </p>
+            </div>
 
             {/* Bottom row */}
-            <p className="text-2xl tracking-[0.08em] leading-tight text-white/60 text-right">
-              FIND OUT YOUR<br />CITIZENS&apos; VIEWS.
-            </p>
-            <Link
-              href="/legislation"
-              className="flex items-center justify-center w-56 h-16 rounded-full bg-[#433650] border border-white text-white text-sm tracking-[0.15em] font-medium hover:bg-[#5a4a6f]"
-            >
-              ANALYZE QUESTIONS
-            </Link>
+            <div className="flex flex-col gap-y-4 h-full items-end justify-self-end helvetica-thin text-white ">
+              <Link
+                href="/issues/new"
+                className="flex items-center justify-center w-[12rem] h-[3.5rem] rounded-full bg-[#1e1e1e] border border-white hover:bg-[#2a2a2a]"
+              >
+                REPORT AN ISSUE
+              </Link>        
+              <Link
+                href="/legislation"
+                className="flex items-center justify-center w-[12rem] h-[3.5rem] rounded-full bg-[#433650] border border-white hover:bg-[#5a4a6f]"
+              >
+                ANALYZE QUESTIONS
+              </Link>
+            </div>
           </div>
         </div>
       </div>
