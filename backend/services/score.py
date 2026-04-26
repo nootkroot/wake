@@ -28,6 +28,9 @@ def _uuid_to_int(value: UUID) -> int:
 
 def fuzz_score(true_score: int, submission_id: UUID, period_id: Optional[UUID]) -> int:
     """Add deterministic Gaussian noise so display_score doesn't leak true_score."""
+    if true_score == 0:
+        # Keep brand-new / zero-vote posts visually consistent in the UI.
+        return 1
     settings = get_settings()
     seed = _uuid_to_int(submission_id)
     if period_id is not None:
