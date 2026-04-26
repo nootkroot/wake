@@ -17,7 +17,7 @@ export function WakeSceneBackdrop({
 
   return (
     <div className={`pointer-events-none ${pos} overflow-hidden`} aria-hidden>
-      <CityBackdrop />
+      <CityBackdrop parallaxEnabled={false} />
       {/* Match landing: deep black top → subtle purple / magenta in the lower field */}
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black via-zinc-950/25 to-fuchsia-950/40" />
       <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black via-transparent to-black/55" />

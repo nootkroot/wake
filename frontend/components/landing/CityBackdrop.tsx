@@ -4,14 +4,18 @@ import { useEffect, useState } from 'react';
 import { FIGMA_ASSETS } from '@/lib/figma-assets';
 
 const PARALLAX_PX = 10; // max ± offset from mouse
-const ZOOM = 1.18; // bg slightly larger than container so translation doesn't reveal edges
-const BASE_Y_OFFSET_PX = 400; // permanent downward shift
+const ZOOM = 1; // bg slightly larger than container so translation doesn't reveal edges
+const BASE_Y_OFFSET_PX = 500; // permanent downward shift
 const OVERSCAN_PX = 520; // extra image bleed to avoid revealing edges when shifted
-const SPRING = 0.14; // pull toward target each frame
-const DAMPING = 0.78; // velocity damping for smoother glide
+const SPRING = 0.3; // pull toward target each frame
+const DAMPING = 0.3; // velocity damping for smoother glide
 
-export default function CityBackdrop() {
+export default function CityBackdrop({ parallaxEnabled = true }: { parallaxEnabled?: boolean }) {
   const [m, setM] = useState({ x: 0, y: 0 });
+  if (!parallaxEnabled) {
+    m.x = 0;
+    m.y = 0;
+  }
 
   useEffect(() => {
     const target = { x: 0, y: 0 };

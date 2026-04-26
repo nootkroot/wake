@@ -12,12 +12,12 @@ export default function IssueCard({ submission }: { submission: Submission }) {
   const sev = SEVERITY_COLOR[submission.severity];
 
   return (
-    <article className="relative w-[373px] h-[520px] bg-[#171821]">
+    <article className="relative w-[25rem] h-[520px] bg-[#171821]">
       {/* Dashed outline */}
-      <div className="absolute inset-0 border border-dashed border-white pointer-events-none" />
+      <div className="absolute inset-[-5px] border border-dashed border-white pointer-events-none" />
 
       {/* Title */}
-      <h2 className="font-bold text-[26px] leading-[1.1] text-white px-7 pt-7 pr-10">
+      <h2 className="helvetica font-bold text-[2rem] leading-[1.1] text-white px-7 pt-7 pr-10">
         {submission.title}
       </h2>
 
@@ -33,7 +33,7 @@ export default function IssueCard({ submission }: { submission: Submission }) {
       </div>
 
       {/* Description */}
-      <p className="px-7 mt-4 text-[#d9d9d9] text-[17px] leading-snug font-medium">
+      <p className="px-7 mt-4 text-[#d9d9d9] text-[1.25rem] leading-snug font-medium">
         {submission.body}
       </p>
 
@@ -43,7 +43,7 @@ export default function IssueCard({ submission }: { submission: Submission }) {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            className="w-8 h-8 border border-white/30 flex items-center justify-center hover:border-white"
+            className="w-8 h-8 border rounded-md border-white/30 flex items-center justify-center hover:border-white"
             aria-label="Upvote"
           >
             <Chevron dir="up" />
@@ -53,7 +53,7 @@ export default function IssueCard({ submission }: { submission: Submission }) {
           </span>
           <button
             type="button"
-            className="w-8 h-8 border border-white/30 flex items-center justify-center hover:border-white"
+            className="w-8 h-8 border rounded-md border-white/30 flex items-center justify-center hover:border-white"
             aria-label="Downvote"
           >
             <Chevron dir="down" />
@@ -86,8 +86,8 @@ export default function IssueCard({ submission }: { submission: Submission }) {
 
 function Chevron({ dir }: { dir: 'up' | 'down' }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      {dir === 'up' ? <path d="M6 15l6-6 6 6" /> : <path d="M6 9l6 6 6-6" />}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+      {dir === 'up' ? <path d="M12 4 L4 18 L20 18 Z" /> : <path d="M12 20 L4 6 L20 6 Z" />}
     </svg>
   );
 }

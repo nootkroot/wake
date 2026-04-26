@@ -48,7 +48,7 @@ export default function HeroPanel() {
                 TALK ABOUT YOUR<br />CITY&apos;S ISSUES.
               </p>
               <p className="tracking-[0.08em] leading-tight w-full text-white/60 text-right">
-                FIND OUT YOUR<br />CITIZENS&apos; VIEWS.
+                LEARN ABOUT YOUR<br />CONSTITUENTS&apos; VIEWS.
               </p>
             </div>
 
