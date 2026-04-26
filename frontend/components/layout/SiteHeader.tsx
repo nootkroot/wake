@@ -15,7 +15,7 @@ export function SiteHeader({ showBrand = true }: { showBrand?: boolean }) {
   const { t } = useSiteLanguage();
 
   return (
-    <header className="relative flex items-center top-0 z-[100] h-[5.5rem] overflow-hidden">
+    <header className="relative flex items-center top-0 z-[100] h-[5.5rem]">
       <div
           aria-hidden
           className="absolute inset-0 h-[10rem] bg-black/10 backdrop-blur-[15px]"

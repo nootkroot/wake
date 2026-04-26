@@ -21,7 +21,7 @@ export const MOCK_SUBMISSIONS: Submission[] = [
     body: 'Streetlight has been out for weeks; the corner is unsafe at night.',
     image_url: FIGMA_ASSETS.cardImageStreetlight,
     severity: 3,
-    display_score: 45,
+    display_score: 25,
     vote_count: 51,
     tags: ['Safety'],
     created_at: '2026-04-05T00:00:00Z',
@@ -41,7 +41,7 @@ export const MOCK_SUBMISSIONS: Submission[] = [
     id: '3',
     title: 'Bus shelter vandalized at 12th',
     body: 'Smashed glass at the 12th & Oak stop; needs immediate cleanup.',
-    image_url: FIGMA_ASSETS.cardImageStreetlight,
+    image_url: "https://i.cbc.ca/1.2743934.1408715540!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_620/bus-shelter-vandalized.jpg",
     severity: 2,
     display_score: 14,
     vote_count: 18,
@@ -52,7 +52,7 @@ export const MOCK_SUBMISSIONS: Submission[] = [
     id: '4',
     title: 'Park lighting insufficient',
     body: 'Riverside Park trails go pitch dark after sunset.',
-    image_url: FIGMA_ASSETS.cardImagePothole,
+    image_url: "https://dm0qx8t0i9gc9.cloudfront.net/thumbnails/video/SEcSCp_lol7ukts6n/videoblocks-walking-into-dark-parking-lot-at-night-in-touristy-town-area_say-neunt_thumbnail-1080_08.png",
     severity: 2,
     display_score: 28,
     vote_count: 32,
@@ -63,9 +63,9 @@ export const MOCK_SUBMISSIONS: Submission[] = [
     id: '5',
     title: 'Trash overflow on Main St.',
     body: 'Bins along the commercial strip overflowing every weekend.',
-    image_url: FIGMA_ASSETS.cardImageStreetlight,
+    image_url: "https://media.istockphoto.com/id/1175874693/photo/huge-garbage-piles-next-to-the-dumpster-after-city-fair-stacks-of-litter-bags-overflow-trash.jpg?s=612x612&w=0&k=20&c=91x9gxN_tT2gdSH0OQMO1q19KTFdhj56B62-dLY8tso=",
     severity: 2,
-    display_score: 22,
+    display_score: 7,
     vote_count: 27,
     tags: ['Sanitation'],
     created_at: '2026-04-15T00:00:00Z',
@@ -77,7 +77,7 @@ export function getMockSubmissions(): Submission[] {
 }
 
 export function severityLabel(s: Severity): string {
-  return ['Low', 'Med.', 'High', 'Crit.'][s - 1] + ` -  ${s}/4`;
+  return ['Low', 'Med.', 'High', 'Crit.'][s - 1] + ` ${s}/4`;
 }
 
 export function timeAgo(iso: string): string {
