@@ -1,14 +1,12 @@
-"""Vote recording, score fuzzing, and period finalization."""
+"""Vote recording, score display, and period finalization."""
 from __future__ import annotations
 
-import random
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlmodel import Session, select
 
-from ..config import get_settings
 from ..models.submission import Submission, SubmissionStatus
 from ..models.vote import Vote, VoteDirection
 from ..models.voting_period import VotingPeriod
@@ -22,22 +20,14 @@ class DuplicateVoteError(RuntimeError):
 VOTE_COOLDOWN_SECONDS = 2.0
 
 
-def _uuid_to_int(value: UUID) -> int:
-    return int(value)
-
-
 def fuzz_score(true_score: int, submission_id: UUID, period_id: Optional[UUID]) -> int:
-    """Add deterministic Gaussian noise so display_score doesn't leak true_score."""
+    """Deterministic display score for user-facing voting UX."""
+    _ = submission_id
+    _ = period_id
     if true_score == 0:
         # Keep brand-new / zero-vote posts visually consistent in the UI.
         return 1
-    settings = get_settings()
-    seed = _uuid_to_int(submission_id)
-    if period_id is not None:
-        seed ^= _uuid_to_int(period_id)
-    rng = random.Random(seed)
-    noise = rng.gauss(0, settings.fuzz_sigma)
-    return true_score + round(noise)
+    return true_score + 1
 
 
 class ScoreService:
