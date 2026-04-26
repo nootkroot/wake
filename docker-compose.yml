@@ -27,7 +27,7 @@ services:
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/wake
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://postgres:postgres@db:5432/wake}
       ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-admin-token}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-google/gemma-4-26b-a4b-it:exacto}

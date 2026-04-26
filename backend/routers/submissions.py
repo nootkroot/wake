@@ -7,6 +7,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from ..dependencies import get_db, get_session_id, require_user
@@ -38,16 +39,21 @@ def _to_read(sub: Submission, user_vote: Optional[int] = None) -> SubmissionRead
 
 def _ensure_author_exists(session: Session, user_id: UUID) -> None:
     """Create a stub auth.users row so local FK checks pass in demo mode."""
-    session.execute(
-        text(
-            """
-            INSERT INTO auth.users (id)
-            VALUES (:user_id)
-            ON CONFLICT (id) DO NOTHING
-            """
-        ),
-        {"user_id": user_id},
-    )
+    try:
+        session.execute(
+            text(
+                """
+                INSERT INTO auth.users (id)
+                VALUES (:user_id)
+                ON CONFLICT (id) DO NOTHING
+                """
+            ),
+            {"user_id": user_id},
+        )
+    except SQLAlchemyError:
+        # Hosted Supabase DB users may not have write access to auth schema.
+        # In that case, rely on existing auth.users row from Supabase Auth.
+        pass
 
 
 @router.post("", response_model=SubmissionRead, status_code=201)

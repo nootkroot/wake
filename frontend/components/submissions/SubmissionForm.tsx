@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Map, { Marker } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -27,27 +27,62 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
   const [tagsRaw, setTagsRaw] = useState("");
   const [lat, setLat] = useState<string>(DEFAULT_LAT.toFixed(6));
   const [lng, setLng] = useState<string>(DEFAULT_LNG.toFixed(6));
+  const [mapView, setMapView] = useState({
+    latitude: DEFAULT_LAT,
+    longitude: DEFAULT_LNG,
+    zoom: 12,
+  });
   const [anonymous, setAnonymous] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [geoPermission, setGeoPermission] = useState<"granted" | "prompt" | "denied" | "unknown">(
+    "unknown",
+  );
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.permissions) return;
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((status) => {
+        setGeoPermission(status.state);
+        status.onchange = () => setGeoPermission(status.state);
+      })
+      .catch(() => {
+        setGeoPermission("unknown");
+      });
+  }, []);
 
   async function detectLocation() {
-    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setError("Geolocation is not available in this browser.");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLat(pos.coords.latitude.toFixed(6));
-        setLng(pos.coords.longitude.toFixed(6));
+        updateLocation(pos.coords.latitude, pos.coords.longitude, 14);
       },
-      () => {
-        setError("Couldn't get location — enter manually");
+      (geoError) => {
+        if (geoError.code === 1) {
+          setError("Location permission denied. Allow location access in your browser.");
+        } else if (geoError.code === 2) {
+          setError("Location unavailable. Try again or place the pin manually.");
+        } else {
+          setError("Location request timed out. Try again or place the pin manually.");
+        }
       },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }
 
-  function updateLocation(nextLat: number, nextLng: number) {
+  function updateLocation(nextLat: number, nextLng: number, nextZoom?: number) {
     setLat(nextLat.toFixed(6));
     setLng(nextLng.toFixed(6));
+    setMapView((prev) => ({
+      latitude: nextLat,
+      longitude: nextLng,
+      zoom: nextZoom ?? prev.zoom,
+    }));
   }
 
   async function submit(e: React.FormEvent) {
@@ -173,11 +208,8 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
                 <div className="h-[320px] overflow-hidden rounded-md border border-border">
                   <Map
                     mapboxAccessToken={MAPBOX_TOKEN}
-                    initialViewState={{
-                      latitude: Number(lat) || DEFAULT_LAT,
-                      longitude: Number(lng) || DEFAULT_LNG,
-                      zoom: 12,
-                    }}
+                    {...mapView}
+                    onMove={(evt) => setMapView(evt.viewState)}
                     mapStyle="mapbox://styles/mapbox/dark-v11"
                     onClick={(evt) => updateLocation(evt.lngLat.lat, evt.lngLat.lng)}
                   >
@@ -194,23 +226,33 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
                   Map unavailable. Set <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> to use pin selection.
                 </p>
               )}
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  placeholder="Latitude"
-                  value={lat}
-                  onChange={(e) => setLat(e.target.value)}
-                  required
-                />
-                <Input
-                  placeholder="Longitude"
-                  value={lng}
-                  onChange={(e) => setLng(e.target.value)}
-                  required
-                />
-              </div>
+              <p className="text-xs text-muted-foreground">
+                Pin location: {lat}, {lng}
+              </p>
               <Button type="button" variant="outline" size="sm" onClick={detectLocation}>
                 Use my current location
               </Button>
+              {geoPermission !== "granted" && (
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-300">
+                  <p className="font-medium">Location access needed for auto-pin</p>
+                  {geoPermission === "denied" ? (
+                    <p className="mt-1">
+                      Location is currently blocked for this site, so browsers will not show a
+                      permission popup again.
+                    </p>
+                  ) : (
+                    <p className="mt-1">
+                      Click <span className="font-medium">Use my current location</span> to trigger the
+                      browser permission prompt.
+                    </p>
+                  )}
+                  <ol className="mt-2 list-decimal pl-4 space-y-1">
+                    <li>Click the lock/site icon next to the URL bar.</li>
+                    <li>Set Location to Allow for <code>localhost:3000</code>.</li>
+                    <li>Refresh and click Use my current location again.</li>
+                  </ol>
+                </div>
+              )}
             </div>
           )}
 
