@@ -60,7 +60,9 @@ export function VoteControl({ submission, onChange }: Props) {
       >
         ▲
       </button>
-      <span className="font-mono font-semibold">{score}</span>
+      <span className="font-mono font-semibold" title="Vote popularity score">
+        {score}
+      </span>
       <button
         aria-label="Downvote"
         onClick={() => send(-1)}

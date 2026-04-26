@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthButtons } from "@/components/auth/AuthButtons";
 
 export const metadata: Metadata = {
   title: "Wake",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               >
                 Submit
               </Link>
+              <AuthButtons />
             </div>
           </nav>
         </header>

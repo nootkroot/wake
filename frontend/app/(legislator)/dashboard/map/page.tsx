@@ -12,7 +12,7 @@ export default function DashboardMapPage({
       <header>
         <h1 className="text-2xl font-semibold">Geographic heatmap</h1>
         <p className="text-sm text-muted-foreground">
-          Submission density weighted by score and severity.
+          Submission density weighted by vote popularity and severity.
         </p>
       </header>
       <HeatmapLayer periodId={searchParams.period} />

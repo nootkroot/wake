@@ -114,7 +114,7 @@ export function IssueMap() {
               </div>
               <div className="text-xs" style={{ color: "#94a3b8" }}>
                 Severity: {String(active.properties.severity ?? "?")} ·
-                Score: {String(active.properties.display_score ?? 0)}
+                Vote popularity: {String(active.properties.display_score ?? 0)}
               </div>
               <a
                 className="text-xs"

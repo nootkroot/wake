@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
 import { createSubmission, ApiError } from "@/lib/api";
 import { getOrCreateSessionId } from "@/lib/session";
 import type { DisplayMode, Submission } from "@/lib/types";
+import { browserClient } from "@/lib/supabase";
 
 interface Props {
   defaultMode?: DisplayMode;
@@ -23,7 +25,7 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
   const [anonymous, setAnonymous] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   async function detectLocation() {
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
@@ -40,13 +42,19 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!userId) {
-      setError("Sign in (paste a user UUID for the demo) before submitting.");
-      return;
-    }
     setBusy(true);
     setError(null);
     try {
+      const supabase = browserClient();
+      const {
+        data: { user },
+        error: userErr,
+      } = await supabase.auth.getUser();
+      if (userErr || !user) {
+        setError("Please log in with Supabase before submitting.");
+        return;
+      }
+      setUserEmail(user.email ?? "Signed in");
       const created = await createSubmission(
         {
           display_mode: mode,
@@ -61,7 +69,7 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
           longitude: lng ? Number(lng) : null,
           lang: typeof navigator !== "undefined" ? navigator.language.slice(0, 2) : "en",
         },
-        userId,
+        user.id,
         getOrCreateSessionId(),
       );
       setTitle("");
@@ -107,11 +115,18 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
             ))}
           </div>
 
-          <Input
-            placeholder="User UUID (demo auth)"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-          />
+          <p className="text-xs text-muted-foreground">
+            Submissions require a logged-in Supabase user.{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Log in
+            </Link>{" "}
+            or{" "}
+            <Link href="/signup" className="text-primary hover:underline">
+              sign up
+            </Link>
+            .
+          </p>
+          {userEmail && <p className="text-xs text-muted-foreground">Submitting as {userEmail}</p>}
 
           <Input
             placeholder="Title (max 120 chars)"

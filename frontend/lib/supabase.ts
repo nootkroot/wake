@@ -1,41 +1,9 @@
-// Supabase client factory. Uses @supabase/ssr so the same call works
-// from server components, route handlers, and client components.
-
-import {
-  createBrowserClient,
-  createServerClient,
-  type CookieOptions,
-} from "@supabase/ssr";
-import { cookies } from "next/headers";
+// Browser-only Supabase client factory for auth flows in client components.
+import { createBrowserClient } from "@supabase/ssr";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 export function browserClient() {
   return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
-export function serverClient() {
-  const cookieStore = cookies();
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value, ...options });
-        } catch {
-          // Server components can't set cookies; ignored.
-        }
-      },
-      remove(name: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value: "", ...options });
-        } catch {
-          // Same as above.
-        }
-      },
-    },
-  });
 }

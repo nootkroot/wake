@@ -21,7 +21,7 @@ export default async function SuggestionsPage() {
         <div>
           <h1 className="text-2xl font-semibold">Suggestions</h1>
           <p className="text-sm text-muted-foreground">
-            Forum-style threads, ranked by vote score (fuzzed for display).
+            Forum-style threads, ranked by vote popularity (fuzzed for display).
           </p>
         </div>
         <Link href="/suggestions/new">

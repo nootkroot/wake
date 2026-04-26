@@ -46,7 +46,7 @@ export const shareTargets = {
       embeds: [
         {
           title: p.title,
-          description: `Severity: ${p.severity ?? "?"}/4 · Score: ${p.display_score}`,
+          description: `Severity: ${p.severity ?? "?"}/4 · Vote popularity: ${p.display_score}`,
           color: severityColor(p.severity ?? 1),
           url: submissionUrl(p, origin),
         },

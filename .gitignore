@@ -34,6 +34,7 @@ exports/
 .DS_Store
 .idea/
 .vscode/
+.cursor/
 *.swp
 
 # Database files (in case anyone runs sqlite locally)
