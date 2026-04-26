@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SeverityBadge } from "./SeverityBadge";
@@ -26,6 +26,48 @@ export function SubmissionCard({
 
   const [reportState, setReportState] = useState<"idle" | "sending" | "done">("idle");
   const [current, setCurrent] = useState(submission);
+  const [locationLabel, setLocationLabel] = useState<string | null>(
+    submission.neighborhood?.trim() || null,
+  );
+
+  useEffect(() => {
+    const rawNeighborhood = submission.neighborhood?.trim() || null;
+    setLocationLabel(rawNeighborhood);
+    if (submission.display_mode !== "ISSUE") return;
+    if (submission.latitude == null || submission.longitude == null) return;
+    const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
+    if (!mapboxToken) return;
+    const ac = new AbortController();
+    const coordsFallback = `${submission.latitude.toFixed(4)}, ${submission.longitude.toFixed(4)}`;
+
+    async function resolveAddress() {
+      try {
+        const resp = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${submission.longitude},${submission.latitude}.json?types=address,neighborhood,place,locality&limit=1&access_token=${mapboxToken}`,
+          { signal: ac.signal },
+        );
+        if (!resp.ok) {
+          setLocationLabel(rawNeighborhood || coordsFallback);
+          return;
+        }
+        const data = (await resp.json()) as { features?: Array<{ place_name?: string }> };
+        const placeName = data.features?.[0]?.place_name?.trim();
+        setLocationLabel(placeName && placeName.length > 0 ? placeName : rawNeighborhood || coordsFallback);
+      } catch {
+        if (!ac.signal.aborted) {
+          setLocationLabel(rawNeighborhood || coordsFallback);
+        }
+      }
+    }
+
+    void resolveAddress();
+    return () => ac.abort();
+  }, [
+    submission.display_mode,
+    submission.latitude,
+    submission.longitude,
+    submission.neighborhood,
+  ]);
 
   async function flag() {
     if (reportState !== "idle") return;
@@ -68,7 +110,7 @@ export function SubmissionCard({
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex gap-3">
             <span>{formatDate(submission.created_at)}</span>
-            {submission.neighborhood && <span>· {submission.neighborhood}</span>}
+            {locationLabel && <span>· {locationLabel}</span>}
             {submission.lang !== "en" && <span>· {submission.lang}</span>}
           </div>
           <button onClick={flag} className="hover:text-red-500" aria-label="Report">

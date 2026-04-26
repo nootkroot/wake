@@ -27,6 +27,9 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
   const [tagsRaw, setTagsRaw] = useState("");
   const [lat, setLat] = useState<string>(DEFAULT_LAT.toFixed(6));
   const [lng, setLng] = useState<string>(DEFAULT_LNG.toFixed(6));
+  const [locationLabel, setLocationLabel] = useState<string>(
+    `${DEFAULT_LAT.toFixed(4)}, ${DEFAULT_LNG.toFixed(4)}`,
+  );
   const [mapView, setMapView] = useState({
     latitude: DEFAULT_LAT,
     longitude: DEFAULT_LNG,
@@ -75,6 +78,31 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
     );
   }
 
+  async function resolveLocationLabel(nextLat: number, nextLng: number) {
+    const coordsFallback = `${nextLat.toFixed(4)}, ${nextLng.toFixed(4)}`;
+    if (!MAPBOX_TOKEN) {
+      setLocationLabel(coordsFallback);
+      return;
+    }
+    setLocationLabel("Resolving location...");
+    try {
+      const resp = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${nextLng},${nextLat}.json?types=address,neighborhood,place,locality&limit=1&access_token=${MAPBOX_TOKEN}`,
+      );
+      if (!resp.ok) {
+        setLocationLabel(coordsFallback);
+        return;
+      }
+      const data = (await resp.json()) as {
+        features?: Array<{ place_name?: string }>;
+      };
+      const placeName = data.features?.[0]?.place_name?.trim();
+      setLocationLabel(placeName && placeName.length > 0 ? placeName : coordsFallback);
+    } catch {
+      setLocationLabel(coordsFallback);
+    }
+  }
+
   function updateLocation(nextLat: number, nextLng: number, nextZoom?: number) {
     setLat(nextLat.toFixed(6));
     setLng(nextLng.toFixed(6));
@@ -83,6 +111,7 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
       longitude: nextLng,
       zoom: nextZoom ?? prev.zoom,
     }));
+    void resolveLocationLabel(nextLat, nextLng);
   }
 
   async function submit(e: React.FormEvent) {
@@ -227,7 +256,7 @@ export function SubmissionForm({ defaultMode = "SUGGESTION", onSubmitted }: Prop
                 </p>
               )}
               <p className="text-xs text-muted-foreground">
-                Pin location: {lat}, {lng}
+                Pin location: {locationLabel}
               </p>
               <Button type="button" variant="outline" size="sm" onClick={detectLocation}>
                 Use my current location
