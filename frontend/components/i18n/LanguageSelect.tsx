@@ -13,10 +13,14 @@ export function LanguageSelect() {
         value={locale}
         onChange={(e) => setLocale(e.target.value as SiteLocale)}
         aria-label={t("language", "Language")}
-        className="rounded border border-border bg-transparent px-2 py-1 text-xs"
+        className="wake-language-select rounded border border-border px-2 py-1 text-xs [color-scheme:light]"
       >
         {SITE_LANGUAGES.map((entry) => (
-          <option key={entry.code} value={entry.code}>
+          <option
+            key={entry.code}
+            value={entry.code}
+            className="bg-white text-neutral-900"
+          >
             {entry.label}
           </option>
         ))}

@@ -31,6 +31,17 @@ body {
   font-feature-settings: "ss01", "cv11";
 }
 
+/* Native <select> lists ignore theme in some browsers; force readable menu. */
+select.wake-language-select {
+  background-color: #fff;
+  color: #171717;
+}
+
+select.wake-language-select option {
+  background-color: #fff;
+  color: #171717;
+}
+
 .wake-map-popup .mapboxgl-popup-content {
   background: #0f172a;
   color: #e2e8f0;
