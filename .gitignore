@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.npm/
+.pnp.*
+
+# Frontend env
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Backend env
+backend/.env
+backend/.env.local
+
+# Build / runtime artifacts
+exports/
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Database files (in case anyone runs sqlite locally)
+*.sqlite
+*.sqlite3
+*.db
