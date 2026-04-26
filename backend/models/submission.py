@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import ARRAY, Column, String
+from sqlalchemy import ARRAY, Column, SmallInteger, String
 from sqlmodel import Field, SQLModel
 
 from .common import GranularityLevel
@@ -49,7 +49,9 @@ class Submission(SQLModel, table=True):
     neighborhood: Optional[str] = None
     granularity: GranularityLevel = GranularityLevel.CITY
 
-    severity: Optional[SeverityRank] = None
+    # IntEnum stored as plain SMALLINT (matches the migration); pydantic on
+    # the SQLModel side coerces ints back to SeverityRank members on load.
+    severity: Optional[SeverityRank] = Field(default=None, sa_column=Column(SmallInteger))
     gemma_rationale: Optional[str] = None
     scoring_job_id: Optional[UUID] = None
 

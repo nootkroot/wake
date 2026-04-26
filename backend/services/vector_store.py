@@ -45,14 +45,17 @@ class VectorStore:
         prefer_lang: str = "en",
     ) -> list[RetrievedChunk]:
         # pgvector: `<=>` is cosine distance (lower is better). 1 - distance = similarity.
+        # The embedding parameter is bound as a literal vector — psycopg sends
+        # Python lists as float[] by default, so we explicitly format and cast.
+        embedding_literal = "[" + ",".join(repr(float(x)) for x in query_embedding) + "]"
         sql = """
             SELECT id, doc_id, doc_title, doc_source, source_verified,
                    content, content_translated, lang_translated, lang,
-                   1 - (embedding <=> :embedding) AS similarity
+                   1 - (embedding <=> CAST(:embedding AS vector)) AS similarity
             FROM legislationchunk
             WHERE 1=1
         """
-        params: dict = {"embedding": query_embedding}
+        params: dict = {"embedding": embedding_literal}
         if filter is not None:
             if filter.granularity is not None:
                 sql += " AND granularity = :granularity"
@@ -63,7 +66,7 @@ class VectorStore:
             if filter.lang is not None:
                 sql += " AND lang = :lang"
                 params["lang"] = filter.lang
-        sql += " ORDER BY embedding <=> :embedding LIMIT :limit"
+        sql += " ORDER BY embedding <=> CAST(:embedding AS vector) LIMIT :limit"
         params["limit"] = top_k
 
         result = self.session.execute(text(sql), params).all()

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Annotated, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlmodel import Session, select
 
 from ..dependencies import get_db, get_session_id, require_user
@@ -224,12 +224,12 @@ def update_submission(
     return _to_read(sub)
 
 
-@router.delete("/{submission_id}", status_code=204)
+@router.delete("/{submission_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def delete_submission(
     submission_id: UUID,
     user_id: Annotated[UUID, Depends(require_user)],
     session: Annotated[Session, Depends(get_db)],
-) -> None:
+) -> Response:
     sub = session.get(Submission, submission_id)
     if sub is None:
         raise HTTPException(status_code=404, detail="Submission not found")
@@ -239,6 +239,7 @@ def delete_submission(
     sub.updated_at = datetime.now(timezone.utc)
     session.add(sub)
     session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{submission_id}/vote", response_model=VoteResult)

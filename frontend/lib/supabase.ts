@@ -1,7 +1,11 @@
 // Supabase client factory. Uses @supabase/ssr so the same call works
 // from server components, route handlers, and client components.
 
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
+import {
+  createBrowserClient,
+  createServerClient,
+  type CookieOptions,
+} from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -18,14 +22,14 @@ export function serverClient() {
       get(name: string) {
         return cookieStore.get(name)?.value;
       },
-      set(name: string, value: string, options) {
+      set(name: string, value: string, options: CookieOptions) {
         try {
           cookieStore.set({ name, value, ...options });
         } catch {
           // Server components can't set cookies; ignored.
         }
       },
-      remove(name: string, options) {
+      remove(name: string, options: CookieOptions) {
         try {
           cookieStore.set({ name, value: "", ...options });
         } catch {

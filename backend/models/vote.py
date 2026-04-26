@@ -3,7 +3,7 @@ from enum import IntEnum
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import Column, SmallInteger, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -24,5 +24,5 @@ class Vote(SQLModel, table=True):
     submission_id: UUID = Field(foreign_key="submission.id", index=True)
     session_id: str = Field(index=True)
     user_id: Optional[UUID] = None
-    direction: VoteDirection
+    direction: VoteDirection = Field(sa_column=Column(SmallInteger, nullable=False))
     created_at: datetime = Field(default_factory=_now)
