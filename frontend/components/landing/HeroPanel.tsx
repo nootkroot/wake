@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { FIGMA_ASSETS } from '@/lib/figma-assets';
 
@@ -16,18 +17,20 @@ export default function HeroPanel() {
       />
 
       {/* Content */}
-      <div className="relative z-10 h-full px-14 pt-20 pb-12 flex flex-col justify-between max-w-[640px]">
+      <div className="relative z-10 h-full px-[4rem] pt-10 flex flex-col justify-between max-w-[640px]">
         {/* Logo block */}
-        <div>
+        <div className="ml-auto w-full">
           <img
             src={FIGMA_ASSETS.roundSun}
             alt=""
-            className="w-[420px] h-auto mb-1"
+            className="block aspect-[2/1] h-auto mb-2 object-contain"
           />
-          <h1 className="fnt-display text-[140px] font-bold leading-[0.85] tracking-tighter text-white -mt-2">
-            WAKE
-          </h1>
-          <p className="fnt-med  text-s tracking-[0.16em] text-white text-right pr-1 mt-3 max-w-[420px]">
+          <img
+            src="/assets/WAKE.svg"
+            alt="WAKE"
+            className="block w-full h-auto max-w-full"
+          />
+          <p className="helvetica font-bold text-s tracking-[0em] text-white text-right mt-3 w-full pr-1">
             LET OUR VOICES RISE
           </p>
         </div>
